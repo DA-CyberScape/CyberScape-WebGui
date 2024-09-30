@@ -1,0 +1,389 @@
+@import '../../../node_modules/@fontsource/fira-mono';
+@import "../colors.css";
+@import "../popup.css";
+
+html, body {
+    font-family: 'Fira Mono', monospace;
+    background-color: var(--background);
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-container {
+    position: relative;
+}
+
+#sidenav {
+    height: 100%;
+    width: 260px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: -215px;
+    background-color: var(--primary);
+    overflow-x: hidden;
+    padding-top: 30px;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-right: 2px solid transparent;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+}
+
+#sidenav.open {
+    left: 0;
+    border-right: 2px solid transparent;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 30px;
+}
+
+.sidenav a {
+    padding: 10px 15px;
+    text-decoration: none;
+    margin-bottom: 5px;
+    font-size: 20px;
+    color: var(--text);
+    display: block;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.sidenav a:hover {
+    color: #9d9da8;
+    text-decoration: underline;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidenav a.current_page_item {
+    background-color: var(--accent);
+    color: var(--text);
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 5px;
+    border-left: 5px solid transparent;
+    border-radius: 15px;
+}
+
+.main {
+    margin-left: 60px;
+    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 2px solid transparent;
+    background-color: var(--primary);
+    flex: 1;
+    flex-wrap: wrap;
+    position: relative;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+    box-sizing: border-box;
+    align-items: flex-start;
+}
+
+.main.open {
+    margin-left: 275px;
+}
+
+.nav-container,
+.nav-container * {
+    box-sizing: border-box;
+}
+
+.nav-link .material-icons {
+    vertical-align: middle;
+    float: right;
+}
+
+#sidenav.open .material-icons {
+    visibility: hidden;
+}
+
+.main > .content-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.powerOptions, .dataSources, .IPSettings {
+    background-color: var(--secondary);
+    padding: 10px;
+    border-radius: 15px;
+    flex: 1 1 calc(33% - 20px);
+    min-width: 300px;
+    width: 100%;
+    box-sizing: border-box;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+}
+
+.powerOptions {
+    max-width: 350px;
+}
+
+.dataSources {
+    max-width: 350px;
+}
+
+.IPSettings {
+    max-width: 400px;
+}
+
+.boxHeader {
+    color: var(--text);
+    font-weight: bold;
+    font-size: 24px;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.boxItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.boxText {
+    color: var(--text);
+    font-weight: normal;
+    font-size: 16px;
+    margin-left: 40px;
+}
+
+.boxButton {
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.boxButton i.material-icons {
+    vertical-align: middle;
+    margin-right: 20px;
+}
+
+.powerOnButton i {
+    color: #29e429;
+}
+
+.powerOffButton i {
+    color: #ff4141;
+}
+
+.restartButton i {
+    color: #ffa400;
+}
+
+.editSourceButton {
+    background-color: white;
+    border: none;
+    color: black;
+    font-size: 16px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    width: 100px;
+    height: 30px;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+.addSourceButton {
+    background-color: var(--accent);
+    border: none;
+    color: black;
+    font-size: 16px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    width: 100px;
+    height: 30px;
+    cursor: pointer;
+    margin-right: 20px;
+    outline: none;
+}
+
+.editSourceButton .material-icons {
+    font-size: 14pt;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+.ipInput, .netmaskInput {
+    border: none;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    height: 17px;
+    text-align: center;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+}
+
+.ipInput {
+    width: 120px;
+    margin-right: 40px;
+}
+
+.netmaskInput {
+    width: 40px;
+    margin-right: 120px;
+}
+
+.ipInput:disabled, .netmaskInput:disabled {
+    background-color: #c5c2c2;
+    color: #000;
+}
+
+textarea.invalid {
+    border: solid 2px red;
+}
+
+.IPSettings .customRadioButton {
+    display: none;
+}
+
+.IPSettings .customRadio {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--text);
+    border-radius: 5px;
+    position: relative;
+    cursor: pointer;
+    margin-left: 3px;
+    margin-right: 40px;
+}
+
+.IPSettings .customRadio::after {
+    content: "X";
+    font-size: 16pt;
+    color: var(--accent);
+    position: absolute;
+    top: -2px;
+    left: 4px;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.IPSettings .customRadioButton:checked + .customRadio::after {
+    border-color: var(--text);
+    opacity: 1;
+}
+
+.IPSettings .customRadioLabel {
+    display: flex;
+    align-items: center;
+    color: var(--text);
+    font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.updateIPButton {
+    background-color: var(--accent);
+    border: none;
+    color: black;
+    font-size: 16px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    width: 100px;
+    height: 30px;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+.updateIPButton:disabled {
+    background-color: var(--accent);
+    border: none;
+    color: gray;
+    font-size: 16px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    width: 100px;
+    height: 30px;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+.dropbtn {
+    display: inline-block;
+    background-color: var(--accent);
+    color: var(--primary);
+    padding: 10px 20px;
+    font-size: 16px;
+    text-transform: uppercase;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: 0.5s;
+    letter-spacing: 2px;
+    border-radius: 5px;
+    border: transparent;
+    margin-bottom: 0;
+}
+
+.dropbtn:hover:focus {
+    background-color: #a67912;
+    color: var(--primary);
+}
+
+#myInput {
+    box-sizing: border-box;
+    font-size: 16px;
+    color: black;
+    padding: 14px 20px 12px 10px;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 0;
+}
+
+#myInput:focus {
+    outline: 3px solid #ddd;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f6f6f6;
+    min-width: 230px;
+    max-height: 500px;
+    overflow: auto;
+    border: 1px solid #ddd;
+    z-index: 1;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    background-color: white;
+    color: black;
+    padding: 12px 16px;
+    text-align: left;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.dropdown-item:hover {
+    background-color: #ddd;
+}
+
+.show {
+    display: block;
+}

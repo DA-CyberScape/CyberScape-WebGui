@@ -1,0 +1,174 @@
+.error {
+    color: red;
+    margin-top: 0;
+}
+
+.success {
+    color: green;
+}
+
+label {
+    color: var(--text);
+    margin-left: 40px;
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-box {
+    background-color: var(--secondary);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.popup-box .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: none;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.popup-box h2 {
+    margin: 0 0 15px;
+    padding: 0;
+    color: var(--accent);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.user-box {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.user-box input {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 30px;
+    border: none;
+    border-bottom: 2px solid var(--text);
+    outline: none;
+    background: transparent;
+}
+
+.user-box label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px 0;
+    margin-left: 0;
+    font-size: 16px;
+    color: var(--text);
+    pointer-events: none;
+    transition: 0.5s;
+}
+
+.user-box input:focus ~ label,
+.user-box input:valid ~ label {
+    transform: translateY(-20px);
+    font-size: 14px;
+    color: var(--text);
+}
+
+.popup-box .submit {
+    display: inline-block;
+    background-color: var(--accent);
+    color: var(--primary);
+    padding: 10px 20px;
+    font-size: 16px;
+    text-transform: uppercase;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: 0.5s;
+    letter-spacing: 2px;
+    border-radius: 5px;
+    border: transparent;
+}
+
+.popup-box .submit:hover {
+    background-color: #a67912;
+    color: var(--primary);
+}
+
+.popup-box .close:hover {
+    background: none;
+    color: #c6bfbf;
+}
+
+.user-box .customCheckbox {
+    display: none;
+}
+
+.user-box .customCheckboxLabel {
+    display: flex;
+    align-items: center;
+    color: var(--text);
+    font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    position: relative;
+}
+
+.user-box .customCheckboxBox {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--text);
+    border-radius: 5px;
+    position: relative;
+    margin-left: 10px;
+    background: transparent;
+    transition: border-color 0.3s, background-color 0.3s;
+    cursor: pointer;
+}
+
+.user-box .customCheckbox:checked + .customCheckboxLabel .customCheckboxBox {
+    border-color: var(--accent);
+    background-color: var(--accent);
+}
+
+.user-box .customCheckboxBox::after {
+    content: "X";
+    font-size: 16pt;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.user-box .customCheckbox:checked + .customCheckboxLabel .customCheckboxBox::after {
+    opacity: 1;
+}
+
+.user-box .customCheckboxLabel {
+    pointer-events: all;
+}

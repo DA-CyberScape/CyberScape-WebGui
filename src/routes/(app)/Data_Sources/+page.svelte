@@ -1,0 +1,191 @@
+<script lang="ts">
+	import './styles.css';
+	import { onMount } from 'svelte';
+	import type { Datasource } from '$lib/datasources';
+
+	let dataSources: Datasource[] = [];
+	let updateDataSource: Datasource = {
+		name: '',
+		regex: '',
+		type: '',
+		active: false
+	};
+	let newDataSource: Datasource = {
+		name: '',
+		regex: '',
+		type: '',
+		active: false
+	};
+	let dataError: string = '';
+
+	async function fetchDatasources() {
+		try {
+			const response = await fetch('api/datasources');
+			if (!response.ok) {
+				throw new Error('Failed to fetch data sources');
+			}
+
+			const data = await response.json();
+			dataSources = data.sources || [];
+
+			console.log(dataSources);
+		} catch (err) {
+			console.error('Error fetching data sources:', err);
+		}
+	}
+
+	async function changeDatasource(name: string) {
+		try {
+			const response = await fetch(`/api/datasources?name=${name}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					name: updateDataSource.name,
+					regex: updateDataSource.regex,
+					type: updateDataSource.type,
+					active: updateDataSource.active
+				})
+			});
+			if (response.status === 409) {
+				throw new Error(`Datasource with name ${updateDataSource.name} already exists`);
+			}
+
+			if (!response.ok) {
+				throw new Error('Failed to update data source');
+			}
+
+			const data = await response.json();
+			if (data.error) {
+				console.error('Error updating data source:', data.error);
+			} else {
+				console.log('Data source updated successfully:', data);
+				await fetchDatasources();
+				updateDataSource = {
+					name: '',
+					regex: '',
+					type: '',
+					active: false
+				};
+			}
+		} catch (err) {
+			console.error('Error updating data source:', err);
+		}
+	}
+
+	async function removeDatasource(name: string) {
+		try {
+			const response = await fetch(`/api/datasources?name=${name}`, {
+				method: 'DELETE'
+			});
+			if (!response.ok) {
+				throw new Error('Failed to remove data source');
+			}
+
+			const data = await response.json();
+			if (data.error) {
+				console.error('Error removing data source:', data.error);
+			} else {
+				console.log('Data source removed successfully:', data);
+				await fetchDatasources();
+			}
+		} catch (err) {
+			console.error('Error removing data source:', err);
+		}
+	}
+
+	async function addDatasource() {
+		try {
+			const response = await fetch('/api/datasources', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					name: newDataSource.name,
+					regex: newDataSource.regex,
+					type: newDataSource.type,
+					active: newDataSource.active
+				})
+			});
+			if (response.status === 409) {
+				dataError = `Datasource with name ${newDataSource.name} already exists`;
+				throw new Error(`Datasource with name ${newDataSource.name} already exists`);
+			}
+
+			if (!response.ok) {
+				throw new Error('Failed to add data source');
+			}
+
+			const data = await response.json();
+			if (data.error) {
+				console.error('Error adding data source:', data.error);
+			} else {
+				console.log('Data source added successfully:', data);
+				await fetchDatasources();
+				newDataSource = {
+					name: '',
+					regex: '',
+					type: '',
+					active: false
+				};
+			}
+		} catch (err) {
+			console.error('Error adding data source:', err);
+		}
+	}
+
+
+	onMount(() => {
+		fetchDatasources();
+	});
+</script>
+
+
+<title>Data Sources</title>
+<section>
+    <h1>Data Sources</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Regex</th>
+                <th>Type</th>
+                <th>Active</th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each dataSources as datasource}
+            <tr>
+                <td>{datasource.name}</td>
+                <td>{datasource.regex}</td>
+                <td>{datasource.type}</td>
+                <td>{datasource.active ? 'Yes' : 'No'}</td>
+                <td>
+                    <button disabled title="Edit Data Source" on:click={() => changeDatasource(datasource.name)}>
+                        <i class="material-icons">edit</i>
+                    </button>
+                    <button title="Delete Data Source" on:click={() => removeDatasource(datasource.name)}>
+                        <i class="material-icons">delete</i>
+                    </button>
+                </td>
+            </tr>
+            {/each}
+            <tr>
+                <td><input type="text" bind:value={newDataSource.name}></td>
+                <td><input type="text" bind:value={newDataSource.regex}></td>
+                <td><input type="text" bind:value={newDataSource.type}></td>
+                <td class="checkbox-cell">
+                    <input type="checkbox" bind:checked={newDataSource.active}>
+                </td>
+                <td>
+                    <button title="Add Data Source" on:click={() => addDatasource()}>
+                        <i class="material-icons">add</i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+

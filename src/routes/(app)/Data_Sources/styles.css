@@ -1,0 +1,65 @@
+@import "../../colors.css";
+
+h1 {
+    color: var(--text);
+    margin-left: 30px;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+th, td {
+    border: 2px solid #000000;
+    padding: 8px;
+    text-align: center;    /* Center content horizontally */
+    vertical-align: middle; /* Center content vertically */
+}
+
+th {
+    color: var(--accent);
+    background: var(--background);
+}
+
+td {
+    color: black;
+}
+
+tr:nth-child(even) {
+    background-color: rgba(var(--accentRGB), 0.9);
+}
+
+tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+td button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    border: transparent;
+    background: transparent;
+}
+
+td input[type="text"] {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    border-bottom: black 2px solid;
+}
+
+.checkbox-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.checkbox-cell input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
