@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import './styles.css';
+	import { goto } from '$app/navigation';
 
 	let username: string = '';
 	let password: string = '';
@@ -24,10 +24,15 @@
 			if (!response.ok) {
 				throw new Error('Incorrect username or password');
 			}
+			let redirectTo = new URLSearchParams(window.location.search).get('redirectTo') || '/';
 
-			const redirectTo = new URLSearchParams(window.location.search).get('redirectTo') || '/';
-			goto(redirectTo);
-			location.reload();
+			if (redirectTo[0] !== '/') {
+				redirectTo = '/' + redirectTo;
+			}
+
+			goto(redirectTo).then(() => {
+				window.location.reload();
+			});
 		} catch (err) {
 			if (err instanceof Error) {
 				error = err.message;
@@ -38,6 +43,7 @@
 			loading = false;
 		}
 	}
+
 </script>
 
 <title>Login</title>
@@ -48,11 +54,11 @@
 			<h2>Sign In</h2>
 			<form on:submit|preventDefault={handleSubmit}>
 				<div class="user-box">
-					<input type="text" name="username" autofocus required bind:value={username} />
+					<input type="text" name="username" autofocus autocomplete="username" required bind:value={username} />
 					<label for="username">Username</label>
 				</div>
 				<div class="user-box">
-					<input type="password" name="password" required bind:value={password} />
+					<input type="password" name="password" autocomplete="current-password" required bind:value={password} />
 					<label for="password">Password</label>
 				</div>
 				<button type="submit" disabled={loading}>
