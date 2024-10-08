@@ -14,8 +14,7 @@ export const types: string[] = [
 	'netflowReceiver',
 	'PRTGReceiver',
 	'snmpTrapReceiver',
-	'Syslog',
-	'Custom'
+	'Syslog'
 ];
 
 export function getAllDatasources(): Datasource[] {

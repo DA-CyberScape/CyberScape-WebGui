@@ -321,7 +321,6 @@ textarea.invalid {
     color: var(--primary);
     padding: 10px 20px;
     font-size: 16px;
-    text-transform: uppercase;
     text-decoration: none;
     position: relative;
     overflow: hidden;

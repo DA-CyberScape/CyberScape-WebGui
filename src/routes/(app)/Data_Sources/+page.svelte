@@ -4,9 +4,10 @@
 	import type { Datasource } from '$lib/datasources';
 
 	let dataSources: Datasource[] = [];
+	let oldName: string = '';
 	let updateDataSource: Datasource = {
 		name: '',
-		type: '',
+		type: 'Type',
 		active: false
 	};
 	let newDataSource: Datasource = {
@@ -14,7 +15,9 @@
 		type: 'Type',
 		active: false
 	};
+	let openUpdateDatasourcePopup: boolean = false;
 	let DSTypes: string[] = [];
+	let dataError: string = '';
 
 
 	async function fetchDSTypes() {
@@ -80,6 +83,7 @@
 					type: 'Type',
 					active: false
 				};
+				closeChangeDataSourcePopup();
 			}
 		} catch (err) {
 			console.error('Error updating data source:', err);
@@ -170,6 +174,41 @@
 		dropdown.classList.toggle('show');
 	}
 
+	async function openChangeDataSourcePopup(name: string): Promise<void> {
+		try {
+			await fetchSingleDatasource(name);
+			openUpdateDatasourcePopup = true;
+		} catch (error) {
+			console.error('Failed to open datasource popup:', error);
+		}
+	}
+
+	async function fetchSingleDatasource(name: string) {
+		try {
+			const response = await fetch(`/api/datasources?name=${name}`);
+			if (!response.ok) {
+				throw new Error('Failed to fetch data source');
+			}
+
+			const data = await response.json();
+
+			updateDataSource = data.sources[0] || {};
+			oldName = updateDataSource.name;
+
+		} catch (err) {
+			console.error('Error fetching data source:', err);
+		}
+	}
+
+	function closeChangeDataSourcePopup(): void {
+		openUpdateDatasourcePopup = false;
+		updateDataSource = {
+			name: '',
+			type: '',
+			active: false
+		};
+	}
+
 	onMount(() => {
 		fetchDatasources();
 		fetchDSTypes();
@@ -195,7 +234,7 @@
 				<td>{datasource.type}</td>
 				<td>{datasource.active ? 'Yes' : 'No'}</td>
 				<td>
-					<button disabled title="Edit Data Source" on:click={() => changeDatasource(datasource.name)}>
+					<button title="Edit Data Source" on:click={() => openChangeDataSourcePopup(datasource.name)}>
 						<i class="material-icons">edit</i>
 					</button>
 					<button title="Delete Data Source" on:click={() => removeDatasource(datasource.name)}>
@@ -230,5 +269,60 @@
 		</tr>
 		</tbody>
 	</table>
+
+
+	{#if openUpdateDatasourcePopup}
+		<div class="popup" role="dialog" aria-modal="true" on:click={closeChangeDataSourcePopup}>
+			<div class="container">
+				<div class="popup-box" role="document" on:click|stopPropagation>
+					<button class="close" on:click={closeChangeDataSourcePopup} aria-label="Close popup">✖</button>
+					<h2>Update Datasource</h2>
+					<form on:submit|preventDefault={() => changeDatasource(oldName)}>
+
+						<div class="user-box">
+							<input type="text" name="sourceName" required bind:value={updateDataSource.name} />
+							<label for="sourceName">Name</label>
+						</div>
+
+						<div class="user-box">
+							<div class="dropdown">
+								{#if updateDataSource.type}
+									<button type="button" on:click={openDropdown} class="dropbtn">{updateDataSource.type}</button>
+								{:else}
+									<button type="button" on:click={openDropdown} class="dropbtn">Type</button>
+								{/if}
+								<div id="myDropdown" class="dropdown-content">
+									<input type="text" placeholder="Search.." id="myInput" on:keyup={filterFunction}>
+									{#each DSTypes as type}
+										<button type="button" on:click={() => selectType(type)} class="dropdown-item">
+											{type}
+										</button>
+									{/each}
+								</div>
+							</div>
+						</div>
+
+						<div class="user-box">
+							<input type="checkbox" id="sourceState" name="sourceState" class="customCheckbox"
+										 bind:checked={updateDataSource.active} />
+							<label for="sourceState" class="customCheckboxLabel">
+								Active:
+								<span class="customCheckboxBox"></span>
+							</label>
+						</div>
+
+						<div class="error">
+							{dataError}
+						</div>
+
+						<button type="submit" class="submit">
+							Update
+						</button>
+
+					</form>
+				</div>
+			</div>
+		</div>
+	{/if}
 </section>
 

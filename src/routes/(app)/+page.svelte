@@ -473,6 +473,13 @@
 						</div>
 					</div>
 
+					{#if newDataSource.type === 'snmpPolls'}
+						<div class="user-box">
+							<input type="text" name="ipAddress" bind:value={newDataSource.ipAddress} />
+							<label for="sourceURL">IP Address</label>
+						</div>
+					{/if}
+
 					<div class="user-box">
 						<input type="checkbox" id="sourceState" name="sourceState" class="customCheckbox"
 									 bind:checked={newDataSource.active} />
