@@ -6,17 +6,31 @@
 	let dataSources: Datasource[] = [];
 	let updateDataSource: Datasource = {
 		name: '',
-		regex: '',
 		type: '',
 		active: false
 	};
 	let newDataSource: Datasource = {
 		name: '',
-		regex: '',
-		type: '',
+		type: 'Type',
 		active: false
 	};
-	let dataError: string = '';
+	let DSTypes: string[] = [];
+
+
+	async function fetchDSTypes() {
+		try {
+			const response = await fetch('/api/DSTypes');
+			if (!response.ok) {
+				throw new Error('Failed to fetch data source types');
+			}
+
+			const data = await response.json();
+			DSTypes = data.types || [];
+
+		} catch (err) {
+			console.error('Error fetching data source types:', err);
+		}
+	}
 
 	async function fetchDatasources() {
 		try {
@@ -43,7 +57,6 @@
 				},
 				body: JSON.stringify({
 					name: updateDataSource.name,
-					regex: updateDataSource.regex,
 					type: updateDataSource.type,
 					active: updateDataSource.active
 				})
@@ -64,8 +77,7 @@
 				await fetchDatasources();
 				updateDataSource = {
 					name: '',
-					regex: '',
-					type: '',
+					type: 'Type',
 					active: false
 				};
 			}
@@ -104,13 +116,11 @@
 				},
 				body: JSON.stringify({
 					name: newDataSource.name,
-					regex: newDataSource.regex,
 					type: newDataSource.type,
 					active: newDataSource.active
 				})
 			});
 			if (response.status === 409) {
-				dataError = `Datasource with name ${newDataSource.name} already exists`;
 				throw new Error(`Datasource with name ${newDataSource.name} already exists`);
 			}
 
@@ -126,8 +136,7 @@
 				await fetchDatasources();
 				newDataSource = {
 					name: '',
-					regex: '',
-					type: '',
+					type: 'Type',
 					active: false
 				};
 			}
@@ -136,56 +145,90 @@
 		}
 	}
 
+	function openDropdown(event: MouseEvent) {
+		event.preventDefault();
+		const dropdown = document.getElementById('myDropdown') as HTMLElement;
+		dropdown.classList.toggle('show');
+	}
+
+	function filterFunction(): void {
+		const input = document.getElementById('myInput') as HTMLInputElement;
+		const filter = input.value.toUpperCase();
+		const div = document.getElementById('myDropdown') as HTMLElement;
+		const buttons = div.getElementsByClassName('dropdown-item');
+
+		for (let i = 0; i < buttons.length; i++) {
+			const button = buttons[i] as HTMLButtonElement;
+			const txtValue = button.textContent || button.innerText;
+			button.style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? '' : 'none';
+		}
+	}
+
+	function selectType(type: string): void {
+		newDataSource.type = type;
+		const dropdown = document.getElementById('myDropdown') as HTMLElement;
+		dropdown.classList.toggle('show');
+	}
 
 	onMount(() => {
 		fetchDatasources();
+		fetchDSTypes();
 	});
 </script>
 
 
 <title>Data Sources</title>
 <section>
-    <h1>Data Sources</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Regex</th>
-                <th>Type</th>
-                <th>Active</th>
-            </tr>
-        </thead>
-        <tbody>
-            {#each dataSources as datasource}
-            <tr>
-                <td>{datasource.name}</td>
-                <td>{datasource.regex}</td>
-                <td>{datasource.type}</td>
-                <td>{datasource.active ? 'Yes' : 'No'}</td>
-                <td>
-                    <button disabled title="Edit Data Source" on:click={() => changeDatasource(datasource.name)}>
-                        <i class="material-icons">edit</i>
-                    </button>
-                    <button title="Delete Data Source" on:click={() => removeDatasource(datasource.name)}>
-                        <i class="material-icons">delete</i>
-                    </button>
-                </td>
-            </tr>
-            {/each}
-            <tr>
-                <td><input type="text" bind:value={newDataSource.name}></td>
-                <td><input type="text" bind:value={newDataSource.regex}></td>
-                <td><input type="text" bind:value={newDataSource.type}></td>
-                <td class="checkbox-cell">
-                    <input type="checkbox" bind:checked={newDataSource.active}>
-                </td>
-                <td>
-                    <button title="Add Data Source" on:click={() => addDatasource()}>
-                        <i class="material-icons">add</i>
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+	<h1>Data Sources</h1>
+	<table>
+		<thead>
+		<tr>
+			<th>Name</th>
+			<th>Type</th>
+			<th>Active</th>
+		</tr>
+		</thead>
+		<tbody>
+		{#each dataSources as datasource}
+			<tr>
+				<td>{datasource.name}</td>
+				<td>{datasource.type}</td>
+				<td>{datasource.active ? 'Yes' : 'No'}</td>
+				<td>
+					<button disabled title="Edit Data Source" on:click={() => changeDatasource(datasource.name)}>
+						<i class="material-icons">edit</i>
+					</button>
+					<button title="Delete Data Source" on:click={() => removeDatasource(datasource.name)}>
+						<i class="material-icons">delete</i>
+					</button>
+				</td>
+			</tr>
+		{/each}
+		<tr>
+			<td><input type="text" bind:value={newDataSource.name}></td>
+			<td>
+				<div class="dropdown">
+					<button type="button" on:click={openDropdown} class="dropbtn">{newDataSource.type}</button>
+					<div id="myDropdown" class="dropdown-content">
+						<input type="text" placeholder="Search.." id="myInput" on:keyup={filterFunction}>
+						{#each DSTypes as type}
+							<button type="button" on:click={() => selectType(type)} class="dropdown-item">
+								{type}
+							</button>
+						{/each}
+					</div>
+				</div>
+			</td>
+			<td class="checkbox-cell">
+				<input type="checkbox" bind:checked={newDataSource.active}>
+			</td>
+			<td>
+				<button title="Add Data Source" on:click={() => addDatasource()}>
+					<i class="material-icons">add</i>
+				</button>
+			</td>
+		</tr>
+		</tbody>
+	</table>
 </section>
 
