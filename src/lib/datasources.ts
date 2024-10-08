@@ -1,25 +1,21 @@
 export interface Datasource {
 	name: string;
-	regex: string;
 	type: string;
 	active: boolean;
 }
 
 export const data: Datasource[] = [
-	{ name: 'Switch', regex: 'switch', type: 'Switch', active: true },
-	{ name: 'Router', regex: 'router', type: 'Router', active: false }
+	{ name: 'Switch', type: 'snmpPolls', active: true },
+	{ name: 'Router', type: 'netflowReceiver', active: false }
 ];
 
 export const types: string[] = [
-	'Switch',
-	'Router',
-	'Firewall',
-	'Access Point',
-	'Server',
-	'VoIP Phone',
-	'Printer',
-	'Computer',
-	'Other'
+	'snmpPolls',
+	'netflowReceiver',
+	'PRTGReceiver',
+	'snmpTrapReceiver',
+	'Syslog',
+	'Custom'
 ];
 
 export function getAllDatasources(): Datasource[] {
@@ -27,19 +23,19 @@ export function getAllDatasources(): Datasource[] {
 }
 
 export function findDatasourceByName(name: string): Datasource | undefined {
-	return data.find(datasource => datasource.name === name);
+	return data.find((datasource) => datasource.name === name);
 }
 
 export function findDatasourceByType(type: string): Datasource | undefined {
-	return data.find(datasource => datasource.type === type);
+	return data.find((datasource) => datasource.type === type);
 }
 
 export function getActiveDatasources(): Datasource[] {
-	return data.filter(datasource => datasource.active);
+	return data.filter((datasource) => datasource.active);
 }
 
 export function getInactiveDatasources(): Datasource[] {
-	return data.filter(datasource => !datasource.active);
+	return data.filter((datasource) => !datasource.active);
 }
 
 export function addDatasource(datasource: Datasource): void {
@@ -51,20 +47,21 @@ export function addDatasource(datasource: Datasource): void {
 }
 
 export function removeDatasource(name: string): void {
-	const index = data.findIndex(datasource => datasource.name === name);
+	const index = data.findIndex((datasource) => datasource.name === name);
 	if (index !== -1) {
 		data.splice(index, 1);
 	}
 }
 
-export function updateDatasource(oldName: string, name: string, regex: string, type: string, active: boolean): void {
+export function updateDatasource(
+	oldName: string,
+	name: string,
+	type: string,
+	active: boolean
+): void {
 	const source = findDatasourceByName(oldName);
 	if (source) {
-		if (oldName === name) {
-			throw new Error(`Datasource with name ${name} already exists`);
-		}
 		source.name = name;
-		source.regex = regex;
 		source.type = type;
 		source.active = active;
 	}

@@ -16,14 +16,12 @@
 	let dataSources: Datasource[] = [];
 	let newDataSource: Datasource = {
 		name: '',
-		regex: '',
 		type: '',
 		active: false
 	};
 	let oldName: string = '';
 	let updateDataSource: Datasource = {
 		name: '',
-		regex: '',
 		type: '',
 		active: false
 	};
@@ -155,7 +153,6 @@
 				},
 				body: JSON.stringify({
 					name: newDataSource.name,
-					regex: newDataSource.regex,
 					type: newDataSource.type,
 					active: newDataSource.active
 				})
@@ -176,7 +173,6 @@
 				await fetchDatasources();
 				newDataSource = {
 					name: '',
-					regex: '',
 					type: '',
 					active: false
 				};
@@ -195,7 +191,6 @@
 				},
 				body: JSON.stringify({
 					name: updateDataSource.name,
-					regex: updateDataSource.regex,
 					type: updateDataSource.type,
 					active: updateDataSource.active
 				})
@@ -217,7 +212,6 @@
 				closeChangeDataSourcePopup();
 				updateDataSource = {
 					name: '',
-					regex: '',
 					type: '',
 					active: false
 				};
@@ -240,7 +234,7 @@
 		}
 	}
 
-	function handleOverlayClick(event: MouseEvent): void {
+	function handleOverlayClick(): void {
 		closeChangeDataSourcePopup();
 		closeAddDataSourcePopup();
 	}
@@ -249,7 +243,6 @@
 		openUpdateDatasourcePopup = false;
 		updateDataSource = {
 			name: '',
-			regex: '',
 			type: '',
 			active: false
 		};
@@ -259,7 +252,6 @@
 		openNewDatasourcePopup = false;
 		newDataSource = {
 			name: '',
-			regex: '',
 			type: '',
 			active: false
 		};
@@ -464,11 +456,6 @@
 					</div>
 
 					<div class="user-box">
-						<input type="text" name="sourceRegex" required bind:value={newDataSource.regex} />
-						<label for="sourceRegex">Regex</label>
-					</div>
-
-					<div class="user-box">
 						<div class="dropdown">
 							{#if newDataSource.type}
 								<button type="button" on:click={openDropdown} class="dropbtn">{newDataSource.type}</button>
@@ -520,11 +507,6 @@
 					<div class="user-box">
 						<input type="text" name="sourceName" required bind:value={updateDataSource.name} />
 						<label for="sourceName">Name</label>
-					</div>
-
-					<div class="user-box">
-						<input type="text" name="sourceRegex" required bind:value={updateDataSource.regex} />
-						<label for="sourceRegex">Regex</label>
 					</div>
 
 					<div class="user-box">

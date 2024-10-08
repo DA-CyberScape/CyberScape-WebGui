@@ -4,7 +4,10 @@ import { getActiveIP, updateIP, validateIPAddress, validateNetmask } from '$lib/
 export const GET: RequestHandler = async () => {
 	const activeIP = getActiveIP();
 	if (activeIP) {
-		return new Response(JSON.stringify(activeIP), { status: 200, headers: { 'Content-Type': 'application/json' } });
+		return new Response(JSON.stringify(activeIP), {
+			status: 200,
+			headers: { 'Content-Type': 'application/json' }
+		});
 	} else {
 		return new Response(JSON.stringify({ error: 'No active IP found' }), {
 			status: 404,
@@ -24,6 +27,9 @@ export const PUT: RequestHandler = async ({ request }) => {
 				headers: { 'Content-Type': 'application/json' }
 			});
 		}
+
+		// Additional logs for debugging
+		console.log('Parsed data:', data);
 
 		if (!validateIPAddress(address)) {
 			return new Response(JSON.stringify({ error: 'Invalid IP address' }), {
@@ -59,6 +65,7 @@ export const PUT: RequestHandler = async ({ request }) => {
 			});
 		}
 	} catch (err) {
+		console.error('Error parsing request data:', err);
 		return new Response(JSON.stringify({ error: 'Failed to parse request data' }), {
 			status: 400,
 			headers: { 'Content-Type': 'application/json' }

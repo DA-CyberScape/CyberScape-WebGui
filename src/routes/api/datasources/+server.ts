@@ -43,7 +43,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const newDatasource = await request.json();
 
-		if (!newDatasource.name || !newDatasource.regex || !newDatasource.type) {
+		if (!newDatasource.name || !newDatasource.type) {
 			return new Response(JSON.stringify({ error: 'Invalid datasource data' }), {
 				status: 400,
 				headers: { 'Content-Type': 'application/json' }
@@ -52,10 +52,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const existingDatasource = findDatasourceByName(newDatasource.name);
 		if (existingDatasource) {
-			return new Response(JSON.stringify({ error: `Datasource with name ${newDatasource.name} already exists` }), {
-				status: 409,
-				headers: { 'Content-Type': 'application/json' }
-			});
+			return new Response(
+				JSON.stringify({ error: `Datasource with name ${newDatasource.name} already exists` }),
+				{
+					status: 409,
+					headers: { 'Content-Type': 'application/json' }
+				}
+			);
 		}
 
 		addDatasource(newDatasource);
@@ -83,9 +86,9 @@ export const PUT: RequestHandler = async ({ url, request }) => {
 	}
 
 	try {
-		const { name, regex, type, active } = await request.json();
+		const { name, type, active } = await request.json();
 
-		if (!name || !regex || !type || typeof active !== 'boolean') {
+		if (!name || !type || typeof active !== 'boolean') {
 			return new Response(JSON.stringify({ error: 'Invalid datasource data' }), {
 				status: 400,
 				headers: { 'Content-Type': 'application/json' }
@@ -94,13 +97,16 @@ export const PUT: RequestHandler = async ({ url, request }) => {
 
 		const source = findDatasourceByName(name);
 		if (source && source.name !== oldName) {
-			return new Response(JSON.stringify({ error: `Datasource with name ${name} already exists` }), {
-				status: 409,
-				headers: { 'Content-Type': 'application/json' }
-			});
+			return new Response(
+				JSON.stringify({ error: `Datasource with name ${name} already exists` }),
+				{
+					status: 409,
+					headers: { 'Content-Type': 'application/json' }
+				}
+			);
 		}
 
-		updateDatasource(oldName, name, regex, type, active);
+		updateDatasource(oldName, name, type, active);
 
 		return new Response(JSON.stringify({ message: 'Datasource updated successfully' }), {
 			status: 200,

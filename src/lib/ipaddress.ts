@@ -12,10 +12,15 @@ export const addresses: Ipaddress[] = [
 ];
 
 export function findIPByDHCP(dhcp: boolean): Ipaddress | undefined {
-	return addresses.find(address => address.dhcp === dhcp);
+	return addresses.find((address) => address.dhcp === dhcp);
 }
 
-export function updateIP(address: string, netmask: number, gateway: string, dhcp: boolean): boolean {
+export function updateIP(
+	address: string,
+	netmask: number,
+	gateway: string,
+	dhcp: boolean
+): boolean {
 	const ip = findIPByDHCP(dhcp);
 	const ipInactive = findIPByDHCP(!dhcp);
 	if (!ip && !ipInactive) {
@@ -40,15 +45,17 @@ export function updateIP(address: string, netmask: number, gateway: string, dhcp
 }
 
 export function getActiveIP(): Ipaddress | undefined {
-	return addresses.find(address => address.active);
+	return addresses.find((address) => address.active);
 }
 
 export function validateIPAddress(value: string): boolean {
-	const ipPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+	const ipPattern =
+		/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 	return ipPattern.test(value.trim());
 }
 
-export function validateNetmask(value: string): boolean {
-	const netmaskValue = parseInt(value.trim());
+export function validateNetmask(value: string | number): boolean {
+	const netmaskValue = typeof value === 'string' ? parseInt(value.trim(), 10) : value;
+
 	return !isNaN(netmaskValue) && netmaskValue >= 0 && netmaskValue <= 32;
 }
