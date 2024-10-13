@@ -10,8 +10,6 @@ export const load = async ({ request }) => {
 		const url = new URL(request.url);
 		const pathname = url.pathname;
 
-		console.log('pathname', pathname);
-
 		if (pathname === '/login') {
 			return {};
 		}

@@ -8,8 +8,6 @@ export const load = async ({ request }) => {
 	const url = new URL(request.url);
 	const redirectTo = url.searchParams.get('redirectTo') || '/';
 
-	console.log('redirectTo', redirectTo);
-
 	if (token) {
 		throw redirect(302, redirectTo);
 	}

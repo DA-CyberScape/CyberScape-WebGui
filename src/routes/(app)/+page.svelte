@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './styles.css';
 	import { onMount } from 'svelte';
-	import type { Datasource } from '$lib/datasources';
+	import type { Datasource } from '$lib/sources';
 
 	let ipAddress: string = '';
 	let netmask: string = '';
@@ -114,7 +114,7 @@
 
 	async function fetchDatasources() {
 		try {
-			const response = await fetch('/api/datasources');
+			const response = await fetch('/api/sources');
 			if (!response.ok) {
 				throw new Error('Failed to fetch data sources');
 			}
@@ -129,7 +129,7 @@
 
 	async function fetchSingleDatasource(name: string) {
 		try {
-			const response = await fetch(`/api/datasources?name=${name}`);
+			const response = await fetch(`/api/sources?name=${name}`);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data source');
 			}
@@ -146,7 +146,7 @@
 
 	async function addDatasource() {
 		try {
-			const response = await fetch('/api/datasources', {
+			const response = await fetch('/api/sources', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -184,7 +184,7 @@
 
 	async function changeDatasource(name: string) {
 		try {
-			const response = await fetch(`/api/datasources?name=${name}`, {
+			const response = await fetch(`/api/sources?name=${name}`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json'
