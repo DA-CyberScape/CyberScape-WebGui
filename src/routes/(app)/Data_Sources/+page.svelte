@@ -1,95 +1,118 @@
 <script lang="ts">
-	import './styles.css';
 	import { onMount } from 'svelte';
+	import './styles.css';
 
-	let openUpdateDatasourcePopup: boolean = false;
-	let DSTypes: string[] = [];
-	let dataSources: Array<{
-		ip: string;
-		hostname: string;
-		oids: Array<{ oid: string; name: string }>;
-		user: string;
-		authentication: string;
-		encryption: string;
-		authpass: string;
-		privpass: string;
-		port: number;
-	}> = [];
+	let dataSources: any = null;
+	let dataStructure: any = null;
 
-	async function fetchDatasources() {
+	onMount(async () => {
 		try {
-			const response = await fetch('/api/sources');
-			if (!response.ok) {
-				throw new Error('Failed to fetch data sources');
+			const sourcesResponse = await fetch('/api/sources');
+			const structureResponse = await fetch('/api/dsstructure');
+
+			if (!sourcesResponse.ok) {
+				throw new Error(`Error fetching sources: ${sourcesResponse.statusText}`);
+			}
+			if (!structureResponse.ok) {
+				throw new Error(`Error fetching structure: ${structureResponse.statusText}`);
 			}
 
-			const jsonData = await response.json();
-			dataSources = jsonData.snmpPolls || []; // Accessing snmpPolls directly
+			dataSources = await sourcesResponse.json();
+			dataStructure = await structureResponse.json();
 
-		} catch (err) {
-			console.error('Error fetching data sources:', err);
+			console.log('Parsed Data Sources:', dataSources);
+			console.log('Parsed Data Structure:', dataStructure);
+		} catch (error) {
+			console.error('Error fetching data:', error);
 		}
-	}
-
-	async function fetchDSTypes() {
-		try {
-			const response = await fetch('/api/DSTypes');
-			if (!response.ok) {
-				throw new Error('Failed to fetch data source types');
-			}
-
-			const data = await response.json();
-			DSTypes = data.types || [];
-		} catch (err) {
-			console.error('Error fetching data source types:', err);
-		}
-	}
-
-	onMount(() => {
-		fetchDatasources();
-		fetchDSTypes();
 	});
 </script>
 
 <style>
-    p {
-        color: white;
-    }
 
-    h3 {
-        color: white;
-    }
 
-    h1 {
-        color: white;
-    }
-
-		ul {
-				color: white;
-		}
 </style>
 
-<title>Data Sources</title>
 <section>
 	<h1>Data Sources</h1>
-	<!-- Display the data sources in a list -->
-	{#if dataSources.length > 0}
-		<ul>
-			{#each dataSources as source}
-				<li>
-					<h2>{source.hostname}</h2>
-					<p>IP Address: {source.ip}</p>
-					<p>Port: {source.port}</p>
-					<h3>OID Details:</h3>
-					<ul>
-						{#each source.oids as oid}
-							<li>{oid.name}: {oid.oid}</li>
+	{#if dataSources && dataStructure}
+		{#each dataSources as sourceItem}
+			{#each Object.keys(sourceItem) as sourceKey}
+				<h2>{sourceKey}</h2>
+
+				{#if sourceItem[sourceKey] && Array.isArray(sourceItem[sourceKey]) && sourceItem[sourceKey].length > 0}
+					<table>
+						<thead>
+						<tr>
+							{#each Object.keys(dataStructure[sourceKey][0]) as columnKey}
+								<th>{columnKey}</th>
+							{/each}
+						</tr>
+						</thead>
+						<tbody>
+						{#each sourceItem[sourceKey] as item}
+							<tr>
+								{#each Object.keys(dataStructure[sourceKey][0]) as columnKey}
+									<td>
+										{#if Array.isArray(item[columnKey])}
+											<table class="nested-table">
+												<thead>
+												<tr>
+													{#each Object.keys(item[columnKey][0]) as nestedColumnKey}
+														<th>{nestedColumnKey}</th>
+													{/each}
+												</tr>
+												</thead>
+												<tbody>
+												{#each item[columnKey] as nestedItem}
+													<tr>
+														{#each Object.keys(item[columnKey][0]) as nestedColumnKey}
+															<td>
+																{nestedItem[nestedColumnKey] || '-'}
+															</td>
+														{/each}
+													</tr>
+												{/each}
+												</tbody>
+											</table>
+										{:else if typeof item[columnKey] === 'object' && item[columnKey] !== null}
+											{#if columnKey === 'authParameters'}
+												<table class="nested-table">
+													<thead>
+													<tr>
+														{#each Object.keys(item[columnKey]) as paramKey}
+															<th>{paramKey}</th>
+														{/each}
+													</tr>
+													</thead>
+													<tbody>
+													<tr>
+														{#each Object.keys(item[columnKey]) as paramKey}
+															<td>
+																{item[columnKey][paramKey] || '-'}
+															</td>
+														{/each}
+													</tr>
+													</tbody>
+												</table>
+											{:else}
+												<pre>{JSON.stringify(item[columnKey], null, 2)}</pre>
+											{/if}
+										{:else}
+											{item[columnKey] || '-'}
+										{/if}
+									</td>
+								{/each}
+							</tr>
 						{/each}
-					</ul>
-				</li>
+						</tbody>
+					</table>
+				{:else}
+					<p style="color: red;">No data available for {sourceKey}.</p>
+				{/if}
 			{/each}
-		</ul>
+		{/each}
 	{:else}
-		<p>No data sources available.</p>
+		<p>Loading data sources...</p>
 	{/if}
 </section>
