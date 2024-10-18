@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import './styles.css';
 
 	let dataSources: any = null;
@@ -26,6 +27,12 @@
 			console.error('Error fetching data:', error);
 		}
 	});
+
+	function handleRowClick(id: string) {
+		goto(`/Data_Sources/${id}`).then(() => {
+			window.location.reload();
+		});
+	}
 </script>
 
 <style>
@@ -44,21 +51,21 @@
 					<table>
 						<thead>
 						<tr>
-							{#each Object.keys(dataStructure[sourceKey][0]) as columnKey}
+							{#each Object.keys(dataStructure[sourceKey][0]).filter(key => key !== 'id') as columnKey}
 								<th>{columnKey}</th>
 							{/each}
 						</tr>
 						</thead>
 						<tbody>
 						{#each sourceItem[sourceKey] as item}
-							<tr>
-								{#each Object.keys(dataStructure[sourceKey][0]) as columnKey}
+							<tr on:click={() => handleRowClick(item.id)}>
+								{#each Object.keys(dataStructure[sourceKey][0]).filter(key => key !== 'id') as columnKey}
 									<td>
 										{#if Array.isArray(item[columnKey])}
 											<table class="nested-table">
 												<thead>
 												<tr>
-													{#each Object.keys(item[columnKey][0]) as nestedColumnKey}
+													{#each Object.keys(item[columnKey][0]).filter(nestedKey => nestedKey !== 'id') as nestedColumnKey}
 														<th>{nestedColumnKey}</th>
 													{/each}
 												</tr>
@@ -66,7 +73,7 @@
 												<tbody>
 												{#each item[columnKey] as nestedItem}
 													<tr>
-														{#each Object.keys(item[columnKey][0]) as nestedColumnKey}
+														{#each Object.keys(item[columnKey][0]).filter(nestedKey => nestedKey !== 'id') as nestedColumnKey}
 															<td>
 																{nestedItem[nestedColumnKey] || '-'}
 															</td>
@@ -80,14 +87,14 @@
 												<table class="nested-table">
 													<thead>
 													<tr>
-														{#each Object.keys(item[columnKey]) as paramKey}
+														{#each Object.keys(item[columnKey]).filter(paramKey => paramKey !== 'id') as paramKey}
 															<th>{paramKey}</th>
 														{/each}
 													</tr>
 													</thead>
 													<tbody>
 													<tr>
-														{#each Object.keys(item[columnKey]) as paramKey}
+														{#each Object.keys(item[columnKey]).filter(paramKey => paramKey !== 'id') as paramKey}
 															<td>
 																{item[columnKey][paramKey] || '-'}
 															</td>

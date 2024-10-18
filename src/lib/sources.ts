@@ -104,26 +104,22 @@ const sources: string =
 	'        "id": 12312312,\n' +
 	'        "port": 162,\n' +
 	'        "version": "SNMPv3",\n' +
-	'        "authParameters": {\n' +
-	'          "username": "snmpv3user",\n' +
-	'          "authProtocol": "SHA",\n' +
-	'          "authPassword": "authPassword123",\n' +
-	'          "privacyProtocol": "AES",\n' +
-	'          "privacyPassword": "privPassword123"\n' +
-	'        }\n' +
+	'        "username": "snmpv3user",\n' +
+	'        "authProtocol": "SHA",\n' +
+	'        "authPassword": "authPassword123",\n' +
+	'        "privacyProtocol": "AES",\n' +
+	'        "privacyPassword": "privPassword123"\n' +
 	'      },\n' +
 	'      {\n' +
 	'        "name": "Trap2",\n' +
 	'        "id": 5675,\n' +
 	'        "port": 162,\n' +
 	'        "version": "SNMPv3",\n' +
-	'        "authParameters": {\n' +
-	'          "username": "snmpv3user",\n' +
-	'          "authProtocol": "SHA",\n' +
-	'          "authPassword": "authPassword123",\n' +
-	'          "privacyProtocol": "AES",\n' +
-	'          "privacyPassword": "privPassword123"\n' +
-	'        }\n' +
+	'        "username": "snmpv3user",\n' +
+	'        "authProtocol": "SHA",\n' +
+	'        "authPassword": "authPassword123",\n' +
+	'        "privacyProtocol": "AES",\n' +
+	'        "privacyPassword": "privPassword123"\n' +
 	'      }\n' +
 	'    ]\n' +
 	'  },\n' +
@@ -143,7 +139,8 @@ const sources: string =
 	'  },\n' +
 	'  {\n' +
 	'    "ScyllaDB": {\n' +
-	'      "port": 123\n' +
+	'      "port": 123,\n' +
+	'      "ipaddresses": 12312\n' +
 	'    }\n' +
 	'  }\n' +
 	']';
@@ -194,13 +191,11 @@ const structure: string =
 	'      "id": "integer",\n' +
 	'      "port": "integer",\n' +
 	'      "version": "string",\n' +
-	'      "authParameters": {\n' +
-	'        "username": "string",\n' +
-	'        "authProtocol": "string",\n' +
-	'        "authPassword": "string",\n' +
-	'        "privacyProtocol": "string",\n' +
-	'        "privacyPassword": "string"\n' +
-	'      }\n' +
+	'      "username": "string",\n' +
+	'      "authProtocol": "string",\n' +
+	'      "authPassword": "string",\n' +
+	'      "privacyProtocol": "string",\n' +
+	'      "privacyPassword": "string"\n' +
 	'    }\n' +
 	'  ],\n' +
 	'  "Syslog": [\n' +
@@ -213,7 +208,7 @@ const structure: string =
 	'  "ScyllaDB": {\n' +
 	'    "port": "integer"\n' +
 	'  }\n' +
-	'}\n';
+	'}';
 
 const dataObject = JSON.parse(sources);
 
