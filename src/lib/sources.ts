@@ -1,5 +1,5 @@
 // src/lib/sources.ts
-const sources: string =
+let sources: string =
 	'[\n' +
 	'  {\n' +
 	'    "snmpPolls": [\n' +
@@ -211,9 +211,21 @@ const structure: string =
 	'}';
 
 const dataObject = JSON.parse(sources);
-
 export { dataObject as sources };
 
 const structureObject = JSON.parse(structure);
-
 export { structureObject as structure };
+
+export function updateSources(newSources: string) {
+	try {
+		const parsedSources = JSON.parse(newSources);
+
+		sources = JSON.stringify(parsedSources, null, 2);
+		Object.assign(dataObject, parsedSources);
+
+		console.log('Sources successfully updated.');
+	} catch (error) {
+		console.error('Error updating sources:', error);
+		throw new Error('Invalid JSON structure');
+	}
+}
