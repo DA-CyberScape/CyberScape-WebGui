@@ -27,7 +27,7 @@ let sources: string =
 	'          }\n' +
 	'        ],\n' +
 	'        "user": "MY-USER",\n' +
-	'        "authentication": "SHA",\n' +
+	'        "authentication": "SHA1",\n' +
 	'        "encryption": "aes 128",\n' +
 	'        "authpass": "MyAuthPass",\n' +
 	'        "privpass": "MyPrivPass",\n' +
@@ -36,7 +36,7 @@ let sources: string =
 	'      {\n' +
 	'        "name": "SwitchSNMP",\n' +
 	'        "id": 123123,\n' +
-	'        "ip": "192.168.1.20",\n' +
+	'        "ip": "192.168.10.20",\n' +
 	'        "hostname": "Switch-1",\n' +
 	'        "oids": [\n' +
 	'          {\n' +
@@ -53,7 +53,7 @@ let sources: string =
 	'          }\n' +
 	'        ],\n' +
 	'        "user": "MY-USER",\n' +
-	'        "authentication": "SHA",\n' +
+	'        "authentication": "SHA1",\n' +
 	'        "encryption": "aes 128",\n' +
 	'        "authpass": "MyAuthPass",\n' +
 	'        "privpass": "MyPrivPass",\n' +
@@ -114,7 +114,7 @@ let sources: string =
 	'        "name": "Trap2",\n' +
 	'        "id": 5675,\n' +
 	'        "port": 162,\n' +
-	'        "version": "SNMPv3",\n' +
+	'        "version": "SNMPv2",\n' +
 	'        "username": "snmpv3user",\n' +
 	'        "authProtocol": "SHA",\n' +
 	'        "authPassword": "authPassword123",\n' +
