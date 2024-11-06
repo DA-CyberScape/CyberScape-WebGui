@@ -24,15 +24,17 @@
 			if (!response.ok) {
 				throw new Error('Incorrect username or password');
 			}
+
+			// Extract the redirectTo URL or fallback to '/'
 			let redirectTo = new URLSearchParams(window.location.search).get('redirectTo') || '/';
 
+			// Ensure the redirectTo URL is valid
 			if (redirectTo[0] !== '/') {
 				redirectTo = '/' + redirectTo;
 			}
 
-			goto(redirectTo).then(() => {
-				window.location.reload();
-			});
+			// Navigate to the intended page without reloading the page
+			goto(redirectTo);
 		} catch (err) {
 			if (err instanceof Error) {
 				error = err.message;
@@ -43,8 +45,8 @@
 			loading = false;
 		}
 	}
-
 </script>
+
 
 <title>Login</title>
 
