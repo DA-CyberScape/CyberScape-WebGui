@@ -5,22 +5,21 @@ export const load = async ({ request }) => {
 	const cookies = cookie.parse(request.headers.get('cookie') || '');
 	const token = cookies['authToken'];
 
-	// If no token and not already on the login page, redirect to login
+	// Get the redirectTo query parameter or default to '/'
 	const url = new URL(request.url);
-	const pathname = url.pathname;
+	const redirectTo = url.searchParams.get('redirectTo') || '/';
 
 	if (!token) {
-		// If user is on the login page, don't redirect to itself
+		// If user is not authenticated and not already on the login page, redirect to login
+		const pathname = url.pathname;
+
+		// If the user is already on the login page, allow it to load
 		if (pathname === '/login') {
-			return {}; // Allow login page to load
+			return {};
 		}
 
-		// For all other routes, redirect to login with the redirectTo parameter
-		const relevantPartMatch = pathname.match(/\/([^/]+)/);
-		const relevantPart = relevantPartMatch ? relevantPartMatch[1] : '';
-
-		// Redirect to login page with redirectTo query parameter
-		throw redirect(302, `/login?redirectTo=${encodeURIComponent(relevantPart)}`);
+		// Redirect to the login page with the redirectTo query parameter
+		throw redirect(302, `/login?redirectTo=${encodeURIComponent(pathname)}`);
 	}
 
 	// If the user is authenticated, allow the page to load
