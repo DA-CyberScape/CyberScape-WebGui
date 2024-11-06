@@ -5,7 +5,7 @@
 
 	let dataSources: any = null;
 	let selectedDataSource: any = null;
-	let dataStructure: any = null; // Data structure for field types and options
+	let dataStructure: any = null;
 	let oids: { oid: string; name: string }[] = [];
 
 	let id: string;
@@ -60,19 +60,60 @@
 	}
 
 	function getInputType(key: string) {
-		const field = dataStructure?.snmpPolls?.[0]?.[key];
-		if (field?.enum) {
-			return 'select';
-		} else if (field === 'integer') {
-			return 'number';
-		} else {
-			return 'text';
+		function findFieldType(obj: any): string | null {
+			if (obj && typeof obj === 'object') {
+				if (Array.isArray(obj)) {
+					for (const item of obj) {
+						const result = findFieldType(item);
+						if (result) return result;
+					}
+				} else {
+					for (const [k, v] of Object.entries(obj)) {
+						if (k === key) {
+							if (v && typeof v === 'object' && 'enum' in v) {
+								return 'select';
+							} else if (v === 'integer') {
+								return 'number';
+							} else {
+								return 'text';
+							}
+						}
+						const result = findFieldType(v);
+						if (result) return result;
+					}
+				}
+			}
+			return null;
 		}
+
+		return findFieldType(dataStructure) || 'text';
 	}
 
-	function getOptions(key: string) {
-		return dataStructure?.snmpPolls?.[0]?.[key]?.enum || [];
+
+	function getOptions(key: string): string[] {
+		function findEnumOptions(obj: any): string[] | null {
+			if (obj && typeof obj === 'object') {
+				if (Array.isArray(obj)) {
+					for (const item of obj) {
+						const result = findEnumOptions(item);
+						if (result) return result;
+					}
+				} else {
+					for (const [k, v] of Object.entries(obj)) {
+						if (k === key && v && typeof v === 'object' && 'enum' in v) {
+							return v.enum;
+						}
+						const result = findEnumOptions(v);
+						if (result) return result;
+					}
+				}
+			}
+			return null;
+		}
+
+		return findEnumOptions(dataStructure) || [];
 	}
+
 
 	function updateDataSource() {
 		const filteredOids = oids.filter(oid => oid.oid && oid.name);

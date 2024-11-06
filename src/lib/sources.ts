@@ -198,17 +198,17 @@ const structure: string =
 	'      "port": "integer",\n' +
 	'      "version": {\n' +
 	'        "type": "string",\n' +
-	'        "enum": ["SNMPv3"]\n' +
+	'        "enum": ["SNMPv3", "SNMPv2"]\n' +
 	'      },\n' +
 	'      "username": "string",\n' +
 	'      "authProtocol": {\n' +
 	'        "type": "string",\n' +
-	'        "enum": ["SHA"]\n' +
+	'        "enum": ["SHA", "MD5"]\n' +
 	'      },\n' +
 	'      "authPassword": "string",\n' +
 	'      "privacyProtocol": {\n' +
 	'        "type": "string",\n' +
-	'        "enum": ["AES"]\n' +
+	'        "enum": ["AES", "DES", "3DES"]\n' +
 	'      },\n' +
 	'      "privacyPassword": "string"\n' +
 	'    }\n' +
