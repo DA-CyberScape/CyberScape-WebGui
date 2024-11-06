@@ -25,15 +25,13 @@
 				throw new Error('Incorrect username or password');
 			}
 
-			// Get the 'redirectTo' query parameter from the URL or default to '/'
-			let redirectTo = new URLSearchParams(window.location.search).get('redirectTo') || '/';
+			const urlParams = new URLSearchParams(window.location.search);
+			let redirectTo = urlParams.get('redirectTo') || '/';
 
-			// Ensure the redirectTo URL is valid
-			if (redirectTo[0] !== '/') {
+			if (redirectTo && redirectTo[0] !== '/') {
 				redirectTo = '/' + redirectTo;
 			}
 
-			// Navigate to the target page and reload the page to ensure CSS and assets are loaded
 			goto(redirectTo).then(() => {
 				window.location.reload();
 			});
