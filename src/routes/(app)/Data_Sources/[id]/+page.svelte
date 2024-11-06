@@ -160,7 +160,6 @@
 				if (!response.ok) {
 					throw new Error(`Error updating data source: ${response.statusText}`);
 				}
-				console.log('Data source updated successfully');
 				window.alert('Data source updated successfully');
 			})
 			.catch(error => {
