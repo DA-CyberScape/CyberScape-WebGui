@@ -5,6 +5,7 @@
 
 	let dataSources: any = null;
 	let selectedDataSource: any = null;
+	let dataStructure: any = null; // Data structure for field types and options
 	let oids: { oid: string; name: string }[] = [];
 
 	let id: string;
@@ -15,15 +16,16 @@
 	onMount(async () => {
 		try {
 			const sourcesResponse = await fetch('/api/sources');
+			const structureResponse = await fetch('/api/dsstructure');
 
-			if (!sourcesResponse.ok) {
-				throw new Error(`Error fetching sources: ${sourcesResponse.statusText}`);
+			if (!sourcesResponse.ok || !structureResponse.ok) {
+				throw new Error('Error fetching data');
 			}
 
 			dataSources = await sourcesResponse.json();
+			dataStructure = await structureResponse.json();
 
 			selectedDataSource = findDataSourceById(id);
-			console.log('Selected Data Source:', selectedDataSource);
 
 			if (selectedDataSource && selectedDataSource.oids && Array.isArray(selectedDataSource.oids)) {
 				oids = [...selectedDataSource.oids.map(oid => ({ oid: oid.oid, name: oid.name }))];
@@ -55,6 +57,21 @@
 		if (index === oids.length - 1 && (oids[index].oid !== '' || oids[index].name !== '')) {
 			oids.push({ oid: '', name: '' });
 		}
+	}
+
+	function getInputType(key: string) {
+		const field = dataStructure?.snmpPolls?.[0]?.[key];
+		if (field?.enum) {
+			return 'select';
+		} else if (field === 'integer') {
+			return 'number';
+		} else {
+			return 'text';
+		}
+	}
+
+	function getOptions(key: string) {
+		return dataStructure?.snmpPolls?.[0]?.[key]?.enum || [];
 	}
 
 	function updateDataSource() {
@@ -103,6 +120,7 @@
 					throw new Error(`Error updating data source: ${response.statusText}`);
 				}
 				console.log('Data source updated successfully');
+				window.alert('Data source updated successfully');
 			})
 			.catch(error => {
 				console.error('Error updating data:', error);
@@ -177,12 +195,27 @@
 						<h4>{key}</h4>
 						<pre>{JSON.stringify(selectedDataSource[key], null, 2)}</pre>
 					{:else}
-						<input
-							type="text"
-							id={key}
-							name={key}
-							bind:value={selectedDataSource[key]}
-						/>
+						{#if getInputType(key) === 'select'}
+							<select id={key} bind:value={selectedDataSource[key]}>
+								{#each getOptions(key) as option}
+									<option value={option}>{option}</option>
+								{/each}
+							</select>
+						{:else if getInputType(key) === 'number'}
+							<input
+								type="number"
+								id={key}
+								name={key}
+								bind:value={selectedDataSource[key]}
+							/>
+						{:else}
+							<input
+								type="text"
+								id={key}
+								name={key}
+								bind:value={selectedDataSource[key]}
+							/>
+						{/if}
 					{/if}
 				</div>
 			{/each}

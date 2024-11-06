@@ -160,8 +160,14 @@ const structure: string =
 	'        }\n' +
 	'      ],\n' +
 	'      "user": "string",\n' +
-	'      "authentication": "string",\n' +
-	'      "encryption": "string",\n' +
+	'      "authentication": {\n' +
+	'        "type": "string",\n' +
+	'        "enum": ["SHA", "MD5"]\n' +
+	'      },\n' +
+	'      "encryption": {\n' +
+	'        "type": "string",\n' +
+	'        "enum": ["AES", "DES", "3DES"]\n' +
+	'      },\n' +
 	'      "authpass": "string",\n' +
 	'      "privpass": "string",\n' +
 	'      "port": "integer"\n' +
@@ -190,11 +196,20 @@ const structure: string =
 	'      "name": "string",\n' +
 	'      "id": "integer",\n' +
 	'      "port": "integer",\n' +
-	'      "version": "string",\n' +
+	'      "version": {\n' +
+	'        "type": "string",\n' +
+	'        "enum": ["SNMPv3"]\n' +
+	'      },\n' +
 	'      "username": "string",\n' +
-	'      "authProtocol": "string",\n' +
+	'      "authProtocol": {\n' +
+	'        "type": "string",\n' +
+	'        "enum": ["SHA"]\n' +
+	'      },\n' +
 	'      "authPassword": "string",\n' +
-	'      "privacyProtocol": "string",\n' +
+	'      "privacyProtocol": {\n' +
+	'        "type": "string",\n' +
+	'        "enum": ["AES"]\n' +
+	'      },\n' +
 	'      "privacyPassword": "string"\n' +
 	'    }\n' +
 	'  ],\n' +
@@ -204,11 +219,8 @@ const structure: string =
 	'      "id": "integer",\n' +
 	'      "port": "integer"\n' +
 	'    }\n' +
-	'  ],\n' +
-	'  "ScyllaDB": {\n' +
-	'    "port": "integer"\n' +
-	'  }\n' +
-	'}';
+	'  ]\n' +
+	'}\n';
 
 const dataObject = JSON.parse(sources);
 export { dataObject as sources };
