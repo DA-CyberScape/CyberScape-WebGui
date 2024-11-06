@@ -25,7 +25,7 @@
 				throw new Error('Incorrect username or password');
 			}
 
-			// Extract the redirectTo URL or fallback to '/'
+			// Get the 'redirectTo' query parameter from the URL or default to '/'
 			let redirectTo = new URLSearchParams(window.location.search).get('redirectTo') || '/';
 
 			// Ensure the redirectTo URL is valid
@@ -33,8 +33,10 @@
 				redirectTo = '/' + redirectTo;
 			}
 
-			// Navigate to the intended page without reloading the page
-			goto(redirectTo);
+			// Navigate to the target page and reload the page to ensure CSS and assets are loaded
+			goto(redirectTo).then(() => {
+				window.location.reload();
+			});
 		} catch (err) {
 			if (err instanceof Error) {
 				error = err.message;
