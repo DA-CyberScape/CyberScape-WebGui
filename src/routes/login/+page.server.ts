@@ -10,7 +10,7 @@ export const load = async ({ request }) => {
 
 	if (token) {
 		if (redirectTo === '/login') {
-			return {};
+			throw redirect(302, '/');
 		}
 		throw redirect(302, redirectTo);
 	}

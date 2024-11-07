@@ -5,13 +5,18 @@ export const load = async ({ request }) => {
 	const cookies = cookie.parse(request.headers.get('cookie') || '');
 	const token = cookies['authToken'];
 
-	if (!token) {
+	if (token) {
+		console.log('login successfull');
+		console.log('token', token);
+	} else {
+		console.log('login failed');
 		const url = new URL(request.url);
 		const pathname = url.pathname;
+		console.log('pathname', pathname);
 
 		if (!token) {
 			if (pathname === '/login') {
-				return {};
+				throw redirect(302, `/login`);
 			}
 			const relevantPartMatch = pathname.match(/\/([^/]+)/);
 			const relevantPart = relevantPartMatch ? relevantPartMatch[1] : '';
