@@ -14,7 +14,7 @@ export const load = async ({ request }) => {
 	console.log('Redirect target:', redirectTo);
 
 	if (token) {
-		if (currentPath === '/login') {
+		if (currentPath === '/login/__data.json') {
 			console.log(`Redirecting from login to ${redirectTo}`);
 			throw redirect(302, redirectTo);
 		}
