@@ -14,9 +14,8 @@ export const POST: RequestHandler = async ({ request }) => {
 				headers: {
 					'Set-Cookie': cookie.serialize('authToken', token, {
 						httpOnly: true,
-						path: '/', // Accessible across the entire site
-						maxAge: 60 * 60, // Cookie expires in 1 hour
-						sameSite: 'none' // CSRF protection, use 'Strict' or 'Lax'
+						path: '/',
+						maxAge: 60 * 60,
 					})
 				}
 			}
