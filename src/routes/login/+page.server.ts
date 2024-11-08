@@ -8,13 +8,20 @@ export const load = async ({ request }) => {
 	console.log('Token in page.server:', token);
 
 	const url = new URL(request.url);
+	const currentPath = url.pathname;
 	const redirectTo = url.searchParams.get('redirectTo') || '/';
 
 	if (token) {
-		if (redirectTo === '/login') {
-			throw redirect(302, '/');
+		if (currentPath === '/login') {
+			console.log(`Redirecting from /login to ${redirectTo}`);
+			throw redirect(302, redirectTo);
 		}
-		throw redirect(302, redirectTo);
+		return {};
+	}
+
+	if (!token && currentPath !== '/login') {
+		console.log(`No token; redirecting to login from ${currentPath}`);
+		throw redirect(302, `/login?redirectTo=${encodeURIComponent(currentPath)}`);
 	}
 
 	return {};
