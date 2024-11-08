@@ -5,23 +5,28 @@ export const load = async ({ request }) => {
 	const cookies = cookie.parse(request.headers.get('cookie') || '');
 	const token = cookies['authToken'];
 
-	console.log('Token in page.server:', token);
-
 	const url = new URL(request.url);
 	const currentPath = url.pathname;
 	const redirectTo = url.searchParams.get('redirectTo') || '/';
 
+	console.log('Token in page.server:', token);
+	console.log('Current path:', currentPath);
+	console.log('Redirect target:', redirectTo);
+
 	if (token) {
 		if (currentPath === '/login') {
-			console.log(`Redirecting from /login to ${redirectTo}`);
+			console.log(`Redirecting from login to ${redirectTo}`);
 			throw redirect(302, redirectTo);
 		}
 		return {};
 	}
 
-	if (!token && currentPath !== '/login') {
-		console.log(`No token; redirecting to login from ${currentPath}`);
-		throw redirect(302, `/login?redirectTo=${encodeURIComponent(currentPath)}`);
+	if (!token) {
+		if (currentPath !== '/login') {
+			console.log(`User not logged in; redirecting to login with redirectTo: ${currentPath}`);
+			throw redirect(302, `/login?redirectTo=${encodeURIComponent(currentPath)}`);
+		}
+		return {};
 	}
 
 	return {};
