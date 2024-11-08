@@ -5,7 +5,7 @@ export const load = async ({ request }) => {
 	const cookies = cookie.parse(request.headers.get('cookie') || '');
 	const token = cookies['authToken'];
 
-	console.log('Token received on server:', token);
+	console.log('Token in layout.server:', token);
 
 	if (!token) {
 		const url = new URL(request.url);

@@ -8,6 +8,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	if (user && user.password === password) {
 		const token = user.token;
+		console.log('Token in login api:', token);
 		return json(
 			{ token },
 			{
@@ -15,7 +16,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					'Set-Cookie': cookie.serialize('authToken', token, {
 						httpOnly: true,
 						path: '/',
-						maxAge: 60 * 60,
+						maxAge: 60 * 60
 					})
 				}
 			}

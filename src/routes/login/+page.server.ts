@@ -5,6 +5,8 @@ export const load = async ({ request }) => {
 	const cookies = cookie.parse(request.headers.get('cookie') || '');
 	const token = cookies['authToken'];
 
+	console.log('Token in page.server:', token);
+
 	const url = new URL(request.url);
 	const redirectTo = url.searchParams.get('redirectTo') || '/';
 
