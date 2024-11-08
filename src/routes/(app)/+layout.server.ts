@@ -9,23 +9,23 @@ export const load = async ({ request }) => {
 
 	console.log('Token in layout.server:', token);
 
+	const url = new URL(request.url);
+	const pathname = url.pathname;
+
+	// Exclude requests to /login/__data.json and any other data fetching routes
+	if (pathname.includes('__data.json') || pathname === '/login') {
+		return {}; // Let the request go through without redirect
+	}
+
+	// If the user is not logged in
 	if (!token) {
-		const url = new URL(request.url);
-		const pathname = url.pathname;
-
-		if (pathname === '/login') {
-			return {};
-		}
-
+		// Redirect the user to the login page if they are not logged in and accessing a protected page
 		const relevantPartMatch = pathname.match(/\/([^/]+)/);
 		const relevantPart = relevantPartMatch ? relevantPartMatch[1] : '';
-
-		if (pathname === '/__data.json') {
-			throw redirect(302, '/login');
-		}
-
+		console.log(`User not logged in; redirecting to login with redirectTo: ${relevantPart}`);
 		throw redirect(302, `/login?redirectTo=${encodeURIComponent(relevantPart)}`);
-	} else {
-		return {};
 	}
+
+	// If the user is logged in, return an empty object to allow them to proceed
+	return {};
 };
