@@ -5,19 +5,17 @@ export const load = async ({ request }) => {
 	const cookies = cookie.parse(request.headers.get('cookie') || '');
 	const token = cookies['authToken'];
 
-	// Log token for debugging purposes
 	console.log('Token in page.server:', token);
 
 	const url = new URL(request.url);
 	const currentPath = url.pathname;
 	const redirectTo = url.searchParams.get('redirectTo') || '/';
 
-	// Exclude requests to /login/__data.json from redirection logic
 	if (currentPath.includes('/login/__data.json')) {
-		return {}; // Let the request go through without redirect
+		console.log('I\'m on __data.json');
+		return {};
 	}
 
-	// If the user is logged in
 	if (token) {
 		// If they’re on the login page, redirect them to their desired path or home
 		if (currentPath === '/login') {
