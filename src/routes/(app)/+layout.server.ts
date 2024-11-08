@@ -5,6 +5,8 @@ export const load = async ({ request }) => {
 	const cookies = cookie.parse(request.headers.get('cookie') || '');
 	const token = cookies['authToken'];
 
+	console.log('layout.server');
+
 	console.log('Token in layout.server:', token);
 
 	if (!token) {
