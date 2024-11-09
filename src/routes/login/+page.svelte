@@ -1,52 +1,11 @@
 <script lang="ts">
 	import './styles.css';
-	import { goto } from '$app/navigation';
 
-	let username: string = '';
-	let password: string = '';
-	let error: string = '';
-	let loading: boolean = false;
+	import type { ActionData } from './$types';
+	import { enhance } from '$app/forms';
 
-	async function handleSubmit(event: Event) {
-		event.preventDefault();
-		loading = true;
-		error = '';
-
-		try {
-			const response = await fetch('/api/login', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ username, password })
-			});
-
-			if (!response.ok) {
-				throw new Error('Incorrect username or password');
-			}
-
-			const urlParams = new URLSearchParams(window.location.search);
-			let redirectTo = urlParams.get('redirectTo') || '/';
-
-			if (redirectTo && redirectTo[0] !== '/') {
-				redirectTo = '/' + redirectTo;
-			}
-
-			goto(redirectTo).then(() => {
-				window.location.reload();
-			});
-		} catch (err) {
-			if (err instanceof Error) {
-				error = err.message;
-			} else {
-				error = 'An unknown error occurred';
-			}
-		} finally {
-			loading = false;
-		}
-	}
+	export let form: ActionData;
 </script>
-
 
 <title>Login</title>
 
@@ -54,24 +13,35 @@
 	<div class="container">
 		<div class="popup-box">
 			<h2>Sign In</h2>
-			<form on:submit|preventDefault={handleSubmit}>
+			<form method="post" use:enhance>
 				<div class="user-box">
-					<input type="text" name="username" autofocus autocomplete="username" required bind:value={username} />
+					<input
+						type="text"
+						name="username"
+						id="username"
+						aria-invalid={form?.error ? 'true' : 'false'}
+						autofocus
+						autocomplete="username"
+						required
+					/>
 					<label for="username">Username</label>
 				</div>
 				<div class="user-box">
-					<input type="password" name="password" autocomplete="current-password" required bind:value={password} />
+					<input
+						type="password"
+						name="password"
+						id="password"
+						aria-invalid={form?.error ? 'true' : 'false'}
+						autocomplete="current-password"
+						required
+					/>
 					<label for="password">Password</label>
 				</div>
-				<button type="submit" disabled={loading}>
-					{#if loading}
-						<span class="loading">Loading...</span>
-					{:else}
-						Login
-					{/if}
-				</button>
-				{#if error}
-					<p class="error">{error}</p>
+				<button type="submit" disabled={form?.loading}>Login</button>
+				{#if form?.error}
+					<div class="notice error" aria-live="polite">
+						{form.error}
+					</div>
 				{/if}
 			</form>
 		</div>
