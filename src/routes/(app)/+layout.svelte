@@ -9,8 +9,6 @@
 
 <Nav_Bar />
 
-<body>
 <div class="main">
 	<slot></slot>
 </div>
-</body>

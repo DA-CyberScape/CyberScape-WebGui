@@ -1,6 +1,5 @@
 <script lang="ts">
 	import './styles.css';
-
 	import type { ActionData } from './$types';
 	import { enhance } from '$app/forms';
 
@@ -37,7 +36,7 @@
 					/>
 					<label for="password">Password</label>
 				</div>
-				<button type="submit" disabled={form?.loading}>Login</button>
+				<button type="submit">Login</button>
 				{#if form?.error}
 					<div class="notice error" aria-live="polite">
 						{form.error}

@@ -1,29 +1,25 @@
-import { redirect } from '@sveltejs/kit';
-import cookie from 'cookie';
+import type { Actions, PageServerLoad } from './$types';
+import { error, redirect } from '@sveltejs/kit';
 
-export const load = async ({ request }) => {
-	const cookies = cookie.parse(request.headers.get('cookie') || '');
-	const token = cookies['authToken'];
+export const load: PageServerLoad = (event) => {
+	const user = event.locals.user;
 
-	console.log('Token in layout:', token);
+	console.log('user:', user);
+	if (!user) {
+		throw error(401, {
+			message: 'You must be logged in to view this page'
+		});
+	}
 
-	if (!token) {
-		const url = new URL(request.url);
-		const pathname = url.pathname;
+	return {
+		user
+	};
+};
 
-		if (!token) {
-			if (pathname === '/login') {
-				return {};
-			}
-			const relevantPartMatch = pathname.match(/\/([^/]+)/);
-			const relevantPart = relevantPartMatch ? relevantPartMatch[1] : '';
+export const actions: Actions = {
+	logout: async (event) => {
+		event.cookies.delete('AuthorizationToken');
 
-			if (pathname == '/__data.json') {
-				throw redirect(302, `/login`);
-			}
-			throw redirect(302, `/login?redirectTo=${encodeURIComponent(relevantPart)}`);
-		}
-
-		return {};
+		throw redirect(302, '/login');
 	}
 };
