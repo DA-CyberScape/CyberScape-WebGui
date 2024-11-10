@@ -15,7 +15,7 @@
 	<div>
 		<h1>Account</h1>
 
-		<p>Hello {user.email}</p>
+		<p style="color: white">Hello {user.username}</p>
 	</div>
 
 	<form method="POST" action="?/logout">

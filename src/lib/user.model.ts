@@ -13,7 +13,7 @@ const loginUser = async (username: string, password: string) => {
 
 	if (!user) {
 		return {
-			error: 'Invalid credentials'
+			error: 'Invalid Username'
 		};
 	}
 
@@ -21,7 +21,7 @@ const loginUser = async (username: string, password: string) => {
 
 	if (!passwordIsValid) {
 		return {
-			error: 'Invalid credentials'
+			error: 'Wrong Password'
 		};
 	}
 

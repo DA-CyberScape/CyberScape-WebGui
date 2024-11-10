@@ -1,6 +1,8 @@
 <script lang="ts">
 	import './styles.css';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+
 	// import type { Datasource } from '$lib/sources';
 
 	let ipAddress: string = '';
@@ -28,7 +30,6 @@
 	// let openNewDatasourcePopup: boolean = false;
 	// let openUpdateDatasourcePopup: boolean = false;
 	// let DSTypes: string[];
-
 
 	function validateIPAddress(value: string): void {
 		const ipPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
@@ -304,6 +305,15 @@
 	$: isFormValid = isIpValid && isNetmaskValid && isGatewayValid;
 
 	onMount(fetchIP);
+	onMount(() => {
+		const unsubscribe = page.subscribe(($page) => {
+			if ($page.url.searchParams.get('reload') === 'true') {
+				window.history.replaceState({}, '', '/');
+				window.location.reload();
+			}
+		});
+		unsubscribe();
+	});
 	// onMount(fetchDatasources);
 	// onMount(fetchDSTypes);
 </script>
