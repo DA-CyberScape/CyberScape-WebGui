@@ -1,29 +1,16 @@
-import { redirect } from '@sveltejs/kit';
-import cookie from 'cookie';
+import { error } from '@sveltejs/kit';
+import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/login/$types';
 
-export const load = async ({ request }) => {
-	const cookies = cookie.parse(request.headers.get('cookie') || '');
-	const token = cookies['authToken'];
+export const load: PageServerLoad = (event) => {
+	const user = event.locals.user;
 
-	console.log('Token in layout:', token);
-
-	if (!token) {
-		const url = new URL(request.url);
-		const pathname = url.pathname;
-
-		if (!token) {
-			if (pathname === '/login') {
-				return {};
-			}
-			const relevantPartMatch = pathname.match(/\/([^/]+)/);
-			const relevantPart = relevantPartMatch ? relevantPartMatch[1] : '';
-
-			if (pathname == '/__data.json') {
-				throw redirect(302, `/login`);
-			}
-			throw redirect(302, `/login?redirectTo=${encodeURIComponent(relevantPart)}`);
-		}
-
-		return {};
+	if (!user) {
+		throw error(401, {
+			message: 'You must be logged in to view this page'
+		});
 	}
+
+	return {
+		user
+	};
 };
