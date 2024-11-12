@@ -21,8 +21,6 @@
 			dataSources = await sourcesResponse.json();
 			dataStructure = await structureResponse.json();
 
-			console.log('Parsed Data Sources:', dataSources);
-			console.log('Parsed Data Structure:', dataStructure);
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}

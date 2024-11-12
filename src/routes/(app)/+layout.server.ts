@@ -1,10 +1,9 @@
-import type { Actions, PageServerLoad } from './$types';
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
+import type { PageServerLoad } from '../../../.svelte-kit/types/src/routes/login/$types';
 
-export const load: PageServerLoad = (event: { locals: { user: any } }) => {
+export const load: PageServerLoad = (event) => {
 	const user = event.locals.user;
 
-	console.log('user homepage:', user);
 	if (!user) {
 		throw error(401, {
 			message: 'You must be logged in to view this page'
@@ -14,12 +13,4 @@ export const load: PageServerLoad = (event: { locals: { user: any } }) => {
 	return {
 		user
 	};
-};
-
-export const actions: Actions = {
-	logout: async (event: { cookies: { delete: (arg0: string) => void } }) => {
-		event.cookies.delete('AuthorizationToken');
-
-		throw redirect(302, '/login');
-	}
 };

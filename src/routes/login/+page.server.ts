@@ -5,7 +5,6 @@ import { loginUser } from '$lib/user.model';
 export const load: PageServerLoad = (event: any) => {
 	const user = event.locals.user;
 
-	console.log('user loginpage:', user);
 
 	if (user) {
 		throw redirect(302, '/?reload=true');
