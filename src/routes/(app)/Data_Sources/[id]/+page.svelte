@@ -177,6 +177,8 @@
 </script>
 
 <section>
+	<title>Data Source: {id}</title>
+
 	<h1>Data Source Details</h1>
 
 	{#if selectedDataSource}
