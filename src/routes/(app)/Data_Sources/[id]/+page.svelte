@@ -176,8 +176,8 @@
 	}
 </script>
 
+<title>Data Source: {id}</title>
 <section>
-	<title>Data Source: {id}</title>
 
 	<h1>Data Source Details</h1>
 
@@ -264,6 +264,6 @@
 			<input type="submit" value="Save" />
 		</form>
 	{:else}
-		<p>Loading data source details...</p>
+		<p style="color: red">No Data Source found with ID: {id}</p>
 	{/if}
 </section>

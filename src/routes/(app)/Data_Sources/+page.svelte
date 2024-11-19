@@ -33,10 +33,7 @@
 	}
 </script>
 
-<style>
-
-
-</style>
+<title>Data Sources</title>
 
 <section>
 	<h1>Data Sources</h1>
@@ -44,7 +41,9 @@
 		{#each dataSources as sourceItem}
 			{#each Object.keys(sourceItem) as sourceKey}
 				<h2>{sourceKey}</h2>
-
+				<button on:click={() => goto(`/Data_Sources/New_DataSource?type=${sourceKey}`)}>
+					Add new
+				</button>
 				{#if sourceItem[sourceKey] && Array.isArray(sourceItem[sourceKey]) && sourceItem[sourceKey].length > 0}
 					<table>
 						<thead>
