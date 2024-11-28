@@ -181,22 +181,7 @@ const structure: string =
 	'    {\n' +
 	'      "name": "string",\n' +
 	'      "id": "integer",\n' +
-	'      "port": "integer",\n' +
-	'      "version": {\n' +
-	'        "type": "string",\n' +
-	'        "enum": ["SNMPv3", "SNMPv2"]\n' +
-	'      },\n' +
-	'      "username": "string",\n' +
-	'      "authProtocol": {\n' +
-	'        "type": "string",\n' +
-	'        "enum": ["SHA", "MD5"]\n' +
-	'      },\n' +
-	'      "authPassword": "string",\n' +
-	'      "privacyProtocol": {\n' +
-	'        "type": "string",\n' +
-	'        "enum": ["AES", "DES", "3DES"]\n' +
-	'      },\n' +
-	'      "privacyPassword": "string"\n' +
+	'      "port": "integer"\n' +
 	'    }\n' +
 	'  ],\n' +
 	'  "Syslog": [\n' +

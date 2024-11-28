@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
-	let selectedDataSource: any = {};
+	let newDataSource: any = {};
 	let oids: { oid: string; name: string }[] = [{ oid: '', name: '' }];
 	let dataStructure: any = null;
 	let type: string;
@@ -30,13 +30,20 @@
 		dataStructure = await response.json();
 	}
 
-	function initializeNewDataSource() {
+	async function initializeNewDataSource() {
 		if (!type || !dataStructure || !(type in dataStructure)) {
 			console.error('Invalid or missing data source type:', type);
 			return;
 		}
 
-		selectedDataSource = createEmptyDataSource(dataStructure[type][0]);
+		newDataSource = createEmptyDataSource(dataStructure[type][0]);
+
+		try {
+			const highestId = await getHighestDataSourceId();
+			newDataSource.id = highestId + 1;
+		} catch (error) {
+			console.error('Error getting the highest data source ID:', error);
+		}
 	}
 
 	function createEmptyDataSource(structureItem: any) {
@@ -45,8 +52,10 @@
 		for (const key in structureItem) {
 			const field = structureItem[key];
 
-			if (Array.isArray(field)) {
-				emptyObject[key] = key === 'oids' ? [{ oid: '', name: '' }] : [];
+			if (key === 'oids' && type === 'snmpPolls') {
+				emptyObject[key] = [{ oid: '', name: '' }];
+			} else if (Array.isArray(field)) {
+				emptyObject[key] = [];
 			} else if (typeof field === 'object' && 'enum' in field) {
 				emptyObject[key] = field.enum[0] || '';
 			} else if (field === 'integer') {
@@ -59,8 +68,44 @@
 		return emptyObject;
 	}
 
+	async function getHighestDataSourceId() {
+		let highestId = 0;
+
+		try {
+			const response = await fetch('/api/sources');
+			if (!response.ok) {
+				throw new Error(`Error fetching data sources: ${response.statusText}`);
+			}
+
+			const existingDataSources = await response.json();
+
+			existingDataSources.forEach((section: any) => {
+				// Only process sections that have arrays
+				Object.values(section).forEach((dataSourceArray: any) => {
+					// Ignore sections that don't have arrays or have irrelevant data like 'ScyllaDB'
+					if (Array.isArray(dataSourceArray)) {
+						dataSourceArray.forEach((dataSource: any) => {
+							if (dataSource.id > highestId) {
+								highestId = dataSource.id;
+							}
+						});
+					}
+				});
+			});
+		} catch (error) {
+			console.error('Error fetching existing data sources:', error);
+		}
+
+		return highestId;
+	}
+
 	async function saveDataSource() {
-		selectedDataSource.oids = oids.filter((oid) => oid.oid && oid.name);
+		if (type !== 'snmpPolls') {
+			delete newDataSource.oids;
+		} else {
+			newDataSource.oids = oids.filter((oid) => oid.oid && oid.name);
+		}
+		console.log('Saving data source:', newDataSource);
 
 		try {
 			const response = await fetch('/api/sources');
@@ -73,7 +118,7 @@
 			const typeSection = existingDataSources.find((section: any) => type in section);
 
 			if (typeSection) {
-				typeSection[type].push(selectedDataSource);
+				typeSection[type].push(newDataSource);
 			} else {
 				console.error(`Type "${type}" not found in the data structure`);
 				window.alert(`Failed to save. Type "${type}" does not exist.`);
@@ -100,13 +145,14 @@
 	}
 
 	function handleInputChange(index: number) {
+		// Check if it's the last OID pair and if it's not empty, add a new empty one
 		if (index === oids.length - 1 && (oids[index].oid !== '' || oids[index].name !== '')) {
-			if (oids.length > 1 && oids[oids.length - 2].oid === '' && oids[oids.length - 2].name === '') {
-				oids.pop();
-			}
-			oids.push({ oid: '', name: '' });
+			console.log('Adding new OID pair');
+			// Update the array reactively
+			oids = [...oids, { oid: '', name: '' }];
 		}
 	}
+
 
 	function getInputType(key: string) {
 		function findFieldType(obj: any): string | null {
@@ -137,7 +183,18 @@
 
 		return findFieldType(dataStructure) || 'text';
 	}
+
+	$: {
+		// Clean up empty OID pairs
+		for (let i = oids.length - 2; i >= 0; i--) {
+			if (oids[i].oid === '' && oids[i].name === '') {
+				oids.splice(i, 1);
+			}
+		}
+	}
+
 </script>
+
 
 <section>
 	<h1>New {type} Data Source</h1>
@@ -152,7 +209,6 @@
 						<div class="oid-group">
 							{#each oids as oid, index}
 								<h5 class="oid-header">OID {index + 1}:</h5>
-
 								<div class="oid-pair">
 									<div class="form-group">
 										<label for={`oid-${index}`}>OID Number:</label>
@@ -182,17 +238,17 @@
 						</div>
 
 					{:else if getInputType(key) === 'select'}
-						<select id={key} bind:value={selectedDataSource[key]} required>
+						<select id={key} bind:value={newDataSource[key]} required>
 							{#each dataStructure[type][0][key].enum as option}
 								<option value={option}>{option}</option>
 							{/each}
 						</select>
 
 					{:else if getInputType(key) === 'number'}
-						<input type="number" id={key} name={key} bind:value={selectedDataSource[key]} required />
+						<input type="number" id={key} name={key} bind:value={newDataSource[key]} required />
 
 					{:else}
-						<input type="text" id={key} name={key} bind:value={selectedDataSource[key]} required />
+						<input type="text" id={key} name={key} bind:value={newDataSource[key]} required />
 					{/if}
 				</div>
 			{/each}
