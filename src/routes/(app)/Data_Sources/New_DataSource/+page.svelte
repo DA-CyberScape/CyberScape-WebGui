@@ -11,7 +11,6 @@
 
 	page.subscribe(($page) => {
 		type = $page.url.searchParams.get('type') || '';
-		console.log('Current type:', type);
 	});
 
 	onMount(async () => {
@@ -29,7 +28,6 @@
 			throw new Error(`Failed to fetch structure: ${response.statusText}`);
 		}
 		dataStructure = await response.json();
-		console.log('Fetched data structure:', dataStructure);
 	}
 
 	function initializeNewDataSource() {
@@ -39,7 +37,6 @@
 		}
 
 		selectedDataSource = createEmptyDataSource(dataStructure[type][0]);
-		console.log('Initialized empty data source:', selectedDataSource);
 	}
 
 	function createEmptyDataSource(structureItem: any) {
@@ -73,9 +70,15 @@
 
 			const existingDataSources = await response.json();
 
-			existingDataSources.push(selectedDataSource);
+			const typeSection = existingDataSources.find((section: any) => type in section);
 
-			console.log('Saving data source:', existingDataSources);
+			if (typeSection) {
+				typeSection[type].push(selectedDataSource);
+			} else {
+				console.error(`Type "${type}" not found in the data structure`);
+				window.alert(`Failed to save. Type "${type}" does not exist.`);
+				return;
+			}
 
 			const saveResponse = await fetch('/api/sources', {
 				method: 'POST',
@@ -95,7 +98,6 @@
 			console.error('Error saving data:', error);
 		}
 	}
-
 
 	function handleInputChange(index: number) {
 		if (index === oids.length - 1 && (oids[index].oid !== '' || oids[index].name !== '')) {
