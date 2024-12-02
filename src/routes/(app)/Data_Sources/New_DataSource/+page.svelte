@@ -199,7 +199,7 @@
 
 </script>
 
-
+<title>New {type} Data Source</title>
 <section>
 	<h1>New {type} Data Source</h1>
 

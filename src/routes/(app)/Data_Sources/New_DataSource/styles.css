@@ -142,3 +142,15 @@ input[type="submit"]:hover {
         font-size: 0.85rem;
     }
 }
+
+#type-dropdown {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+    margin-bottom: 20px;
+}
