@@ -8,6 +8,7 @@
 	let oids: { oid: string; name: string }[] = [{ oid: '', name: '' }];
 	let dataStructure: any = null;
 	let type: string;
+	let availableTypes: string[] = [];
 
 	page.subscribe(($page) => {
 		type = $page.url.searchParams.get('type') || '';
@@ -28,6 +29,7 @@
 			throw new Error(`Failed to fetch structure: ${response.statusText}`);
 		}
 		dataStructure = await response.json();
+		availableTypes = Object.keys(dataStructure);
 	}
 
 	async function initializeNewDataSource() {
@@ -153,7 +155,6 @@
 		}
 	}
 
-
 	function getInputType(key: string) {
 		function findFieldType(obj: any): string | null {
 			if (obj && typeof obj === 'object') {
@@ -184,8 +185,11 @@
 		return findFieldType(dataStructure) || 'text';
 	}
 
+	function changeType(selectedType: string) {
+		goto(`?type=${selectedType}`);
+	}
+
 	$: {
-		// Clean up empty OID pairs
 		for (let i = oids.length - 2; i >= 0; i--) {
 			if (oids[i].oid === '' && oids[i].name === '') {
 				oids.splice(i, 1);
@@ -198,6 +202,15 @@
 
 <section>
 	<h1>New {type} Data Source</h1>
+
+	<div class="form-group">
+		<label for="type-dropdown">Select Data Source Type:</label>
+		<select id="type-dropdown" bind:value={type} on:change={() => changeType(type)}>
+			{#each availableTypes as availableType}
+				<option value={availableType} selected={availableType === type}>{availableType}</option>
+			{/each}
+		</select>
+	</div>
 
 	{#if dataStructure && type in dataStructure}
 		<form on:submit|preventDefault={saveDataSource}>

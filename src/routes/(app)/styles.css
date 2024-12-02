@@ -196,20 +196,6 @@ html, body {
     margin-right: 20px;
 }
 
-.addSourceButton {
-    background-color: var(--accent);
-    border: none;
-    color: black;
-    font-size: 16px;
-    padding: 8px 15px;
-    border-radius: 15px;
-    width: 100px;
-    height: 30px;
-    cursor: pointer;
-    margin-right: 20px;
-    outline: none;
-}
-
 .editSourceButton .material-icons {
     font-size: 14pt;
     vertical-align: middle;
