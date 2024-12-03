@@ -1,4 +1,6 @@
-// Parse dbSettings YAML-like string into an object
+import yaml from 'yaml';
+const { parse } = yaml;
+
 const dbSettingsString: string =
 	'clusterlists:\n' +
 	'  - listname: "Local Cluster"\n' +
@@ -21,13 +23,7 @@ const dbSettingsString: string =
 let dbObject: any;
 
 try {
-	dbObject = JSON.parse(
-		dbSettingsString
-			.replace(/:\s*([\[{])/g, ':$1')
-			.replace(/-\s*listname:/g, '{"listname":')
-			.replace(/production:\s*(true|false)/g, '"production":$1},')
-			.replace(/\},\s*\]/g, '}]')
-	);
+	dbObject = parse(dbSettingsString);
 } catch (error) {
 	console.error('Error parsing settings string:', error);
 }
@@ -37,10 +33,7 @@ export { dbObject as dbSettings };
 export function updateSettings(newSetting: string) {
 	try {
 		const newSettingObject = JSON.parse(newSetting);
-
 		Object.assign(dbObject, newSettingObject);
-
-		console.log('Settings updated successfully:', dbObject);
 	} catch (error) {
 		console.error('Error updating settings:', error);
 	}
