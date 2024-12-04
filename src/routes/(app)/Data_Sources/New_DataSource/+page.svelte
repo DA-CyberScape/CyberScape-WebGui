@@ -107,7 +107,6 @@
 		} else {
 			newDataSource.oids = oids.filter((oid) => oid.oid && oid.name);
 		}
-		console.log('Saving data source:', newDataSource);
 
 		try {
 			const response = await fetch('/api/sources');
@@ -147,10 +146,7 @@
 	}
 
 	function handleInputChange(index: number) {
-		// Check if it's the last OID pair and if it's not empty, add a new empty one
 		if (index === oids.length - 1 && (oids[index].oid !== '' || oids[index].name !== '')) {
-			console.log('Adding new OID pair');
-			// Update the array reactively
 			oids = [...oids, { oid: '', name: '' }];
 		}
 	}

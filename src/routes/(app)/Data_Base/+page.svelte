@@ -16,17 +16,37 @@
 			error = err.message;
 		}
 	});
+
+	async function handleCheckboxChange(clusterIndex: number, field: string, value: boolean) {
+		if (!dbSettings || !dbSettings.clusterlists) return;
+
+		dbSettings.clusterlists[clusterIndex][field] = value;
+
+		try {
+			const response = await fetch('/api/db', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(dbSettings)
+			});
+			if (!response.ok) {
+				throw new Error(`Failed to update data: ${response.statusText}`);
+			}
+		} catch (err) {
+			error = err.message;
+			console.error('Error updating data:', err);
+		}
+	}
 </script>
 
 <title>DB Settings</title>
 
-<section>
-	<h1>DB Settings</h1>
+<section id="db-settings-section">
+	<h1 id="db-settings-title">DB Settings</h1>
 
 	{#if error}
-		<p style="color: red;">Error: {error}</p>
+		<p id="db-settings-error" style="color: red;">Error: {error}</p>
 	{:else if dbSettings}
-		<table border="1">
+		<table id="db-settings-table" border="1">
 			<thead>
 			<tr>
 				<th>Name</th>
@@ -36,17 +56,25 @@
 			</tr>
 			</thead>
 			<tbody>
-			{#each dbSettings.clusterlists as cluster}
+			{#each dbSettings.clusterlists as cluster, index}
 				<tr>
 					<td>{cluster.listname}</td>
 					<td>
-						<input type="checkbox" disabled checked={cluster.active} />
+						<input
+							type="checkbox"
+							bind:checked={cluster.active}
+							on:change={() => handleCheckboxChange(index, 'active', cluster.active)}
+						/>
 					</td>
 					<td>
-						<input type="checkbox" disabled checked={cluster.production} />
+						<input
+							type="checkbox"
+							bind:checked={cluster.production}
+							on:change={() => handleCheckboxChange(index, 'production', cluster.production)}
+						/>
 					</td>
 					<td>
-						<table border="1">
+						<table id="db-settings-subtable" border="1">
 							<thead>
 							<tr>
 								<th>IP Address</th>
@@ -66,6 +94,6 @@
 			</tbody>
 		</table>
 	{:else}
-		<p>Loading...</p>
+		<p id="db-settings-loading">Loading...</p>
 	{/if}
 </section>

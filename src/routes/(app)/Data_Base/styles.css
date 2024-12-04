@@ -1,49 +1,110 @@
 @import "../../colors.css";
 @import "../../popup.css";
 
-h1 {
+/* Section styling */
+#db-settings-section h1 {
     color: var(--text);
     margin-left: 30px;
     font-weight: bold;
     font-size: 30px;
 }
 
-
-h2 {
+#db-settings-section h2 {
     color: var(--text);
 }
 
-table {
+/* Main table styling */
+#db-settings-table {
     width: 100%;
+    max-width: 800px;
     border-collapse: collapse;
     margin: 20px 0;
     font-family: Arial, sans-serif;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    table-layout: fixed;
 }
 
-
-th {
-    background-color: var(--accent);
-    border: 1px solid #a3a3a3;
-    color: var(--text);
+#db-settings-table th, #db-settings-table td {
     padding: 10px;
+    border: 1px solid #a3a3a3;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+#db-settings-table th {
+    background-color: var(--accent);
+    color: var(--text);
+}
+
+#db-settings-table th:nth-child(2),
+#db-settings-table th:nth-child(3),
+#db-settings-table td:nth-child(2),
+#db-settings-table td:nth-child(3) {
+    width: 75px;
+    text-align: center;
+}
+
+/* Subtable styling */
+#db-settings-subtable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#db-settings-subtable th, #db-settings-subtable td {
+    padding: 5px;
+    border: 1px solid #a3a3a3;
     text-align: left;
 }
 
-td {
-    padding: 10px;
-    border: 1px solid #a3a3a3;
+#db-settings-subtable th {
+    background-color: var(--accent);
+    color: var(--text);
 }
 
-tbody tr {
+/* Row hover effects */
+#db-settings-table tbody tr {
     background: #fff;
 }
 
-tbody tr:hover {
+#db-settings-table tbody tr:hover {
     background-color: #e2e2e2;
     cursor: pointer;
 }
 
-td:empty {
+/* Empty cells */
+#db-settings-table td:empty {
     color: #ccc;
+}
+
+/* Checkbox styling */
+#db-settings-table input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+
+#db-settings-table input[type="checkbox"]:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+#db-settings-table input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+#db-settings-table input[type="checkbox"]:hover {
+    box-shadow: 0 0 5px var(--accent);
 }

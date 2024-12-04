@@ -71,7 +71,6 @@ let sources: string =
 	'            "oid": "1.3.6.1.2.1.1.3.0",\n' +
 	'            "name": "UPTIME"\n' +
 	'          },\n' +
-	'          \n' +
 	'          {\n' +
 	'            "oid": ".1.3.6.1.2.1.2.2.1.2",\n' +
 	'            "name": "INTERFACES"\n' +
@@ -114,20 +113,15 @@ let sources: string =
 	'        "port": 514\n' +
 	'      }\n' +
 	'    ]\n' +
-	'  },{\n' +
-	'  "snmpTrapReceiver": [\n' +
-	'    {\n' +
-	'      "name": "SNMP-Trap-Receiver",\n' +
-	'      "id": 123129,\n' +
-	'      "port": 162\n' +
-	'    }\n' +
-	'  ]\n' +
-	'},\n' +
+	'  },\n' +
 	'  {\n' +
-	'    "ScyllaDB": {\n' +
-	'      "port": 123,\n' +
-	'      "ipaddresses": 12312\n' +
-	'    }\n' +
+	'    "snmpTrapReceiver": [\n' +
+	'      {\n' +
+	'        "name": "SNMP-Trap-Receiver",\n' +
+	'        "id": 123123,\n' +
+	'        "port": 162\n' +
+	'      }\n' +
+	'    ]\n' +
 	'  }\n' +
 	']';
 
