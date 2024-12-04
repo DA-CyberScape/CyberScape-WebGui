@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import './styles.css';
+	import { goto } from '$app/navigation';
 
 	let dbSettings: any = null;
 	let error: string | null = null;
@@ -36,6 +37,10 @@
 			console.error('Error updating data:', err);
 		}
 	}
+
+	function openClusterEditPage(clusterName: string) {
+		goto(`/Data_Base/${encodeURIComponent(clusterName)}`);
+	}
 </script>
 
 <title>DB Settings</title>
@@ -57,20 +62,20 @@
 			</thead>
 			<tbody>
 			{#each dbSettings.clusterlists as cluster, index}
-				<tr>
+				<tr on:click={() => openClusterEditPage(cluster.listname)}>
 					<td>{cluster.listname}</td>
 					<td>
 						<input
 							type="checkbox"
 							bind:checked={cluster.active}
-							on:change={() => handleCheckboxChange(index, 'active', cluster.active)}
+							on:click|stopPropagation={() => handleCheckboxChange(index, 'active', cluster.active)}
 						/>
 					</td>
 					<td>
 						<input
 							type="checkbox"
 							bind:checked={cluster.production}
-							on:change={() => handleCheckboxChange(index, 'production', cluster.production)}
+							on:click|stopPropagation={() => handleCheckboxChange(index, 'production', cluster.production)}
 						/>
 					</td>
 					<td>

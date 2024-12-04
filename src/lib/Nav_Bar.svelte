@@ -36,9 +36,10 @@
 
 <div class="nav-container">
 	<nav id="sidenav" class="sidenav">
-		<a href="/" class="nav-link">Home<i class="material-icons">home</i></a>
-		<a href="/Data_Base" class="nav-link">Data Base<i class="material-icons">settings</i></a>
-		<a href="/Data_Sources" class="nav-link">Data Sources<i class="material-icons">list</i></a>
-		<a href="/Account" class="nav-link">Account<i class="material-icons">account_circle</i></a>
+		<a data-sveltekit-preload-data="off" href="/" class="nav-link">Home<i class="material-icons">home</i></a>
+		<a data-sveltekit-preload-data="off" href="/Data_Sources" class="nav-link">Data Sources<i class="material-icons">list</i></a>
+		<a data-sveltekit-preload-data="off" href="/Data_Base" class="nav-link">Data Base<i
+			class="material-icons">settings</i></a>
+		<a data-sveltekit-preload-data="off" href="/Account" class="nav-link">Account<i class="material-icons">account_circle</i></a>
 	</nav>
 </div>
