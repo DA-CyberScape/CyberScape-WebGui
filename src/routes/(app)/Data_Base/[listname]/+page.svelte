@@ -36,6 +36,15 @@
 		return !dbSettings.clusterlists.some((cluster: any) => cluster.listname === newName);
 	}
 
+	// Deactivate all clusters except the one being updated
+	function deactivateOtherClusters(clusterToEdit: any) {
+		dbSettings.clusterlists.forEach((cluster: any) => {
+			if (cluster !== clusterToEdit) {
+				cluster.active = false;
+			}
+		});
+	}
+
 	async function updateData() {
 		validationErrors = {}; // Reset validation errors
 
@@ -57,16 +66,23 @@
 			return;
 		}
 
+		// Deactivate other clusters if the current one is active
+		if (clusterToEdit.active) {
+			deactivateOtherClusters(clusterToEdit);
+		}
+
 		// Proceed with updating the data
 		try {
 			const response = await fetch('/api/db', {
-				method: 'PUT',
+				method: 'POST',  // Change from PUT to POST
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(dbSettings)
 			});
+
 			if (!response.ok) {
 				throw new Error(`Failed to update data: ${response.statusText}`);
 			}
+
 			alert('Cluster settings updated successfully!');
 		} catch (err) {
 			error = err.message;
@@ -90,7 +106,6 @@
 
 	onMount(fetchData);
 </script>
-
 
 <title>Edit Database Cluster</title>
 

@@ -3,8 +3,24 @@
 	import './styles.css';
 	import { goto } from '$app/navigation';
 
-	let dbSettings: any = null;
+	interface Cluster {
+		listname: string;
+		active: boolean;
+		production: boolean;
+		list: string[];
+	}
+
+	interface DBSettings {
+		clusterlists: Cluster[];
+	}
+
+	let dbSettings: DBSettings | null = null;
 	let error: string | null = null;
+
+	// Popup state
+	let showPopup = false;
+	let popupClusterIndex: number | null = null;
+	let tempActiveState: boolean[] = [];
 
 	onMount(async () => {
 		try {
@@ -13,16 +29,46 @@
 				throw new Error(`Failed to fetch data: ${response.statusText}`);
 			}
 			dbSettings = await response.json();
+
+			// Initialize temporary checkbox states
+			if (dbSettings) {
+				tempActiveState = dbSettings.clusterlists.map(cluster => cluster.active);
+			}
 		} catch (err) {
-			error = err.message;
+			error = err instanceof Error ? err.message : 'Unknown error';
 		}
 	});
 
-	async function handleCheckboxChange(clusterIndex: number, field: string, value: boolean) {
-		if (!dbSettings || !dbSettings.clusterlists) return;
+	function openPopup(clusterIndex: number) {
+		showPopup = true;
+		popupClusterIndex = clusterIndex;
 
-		dbSettings.clusterlists[clusterIndex][field] = value;
+		// Temporarily update the state to reflect the clicked checkbox
+		tempActiveState = dbSettings?.clusterlists.map((cluster, index) =>
+			index === clusterIndex
+		) || [];
+	}
 
+	function closePopup() {
+		// Revert to the original state
+		tempActiveState = dbSettings?.clusterlists.map(cluster => cluster.active) || [];
+		showPopup = false;
+		popupClusterIndex = null;
+	}
+
+	async function confirmActiveChange() {
+		if (popupClusterIndex === null || !dbSettings) return;
+
+		// Update active status: only one active at a time
+		dbSettings = {
+			...dbSettings,
+			clusterlists: dbSettings.clusterlists.map((cluster, index) => ({
+				...cluster,
+				active: index === popupClusterIndex // Only the selected one becomes active
+			}))
+		};
+
+		// Persist the change
 		try {
 			const response = await fetch('/api/db', {
 				method: 'POST',
@@ -33,8 +79,24 @@
 				throw new Error(`Failed to update data: ${response.statusText}`);
 			}
 		} catch (err) {
-			error = err.message;
+			error = err instanceof Error ? err.message : 'Unknown error';
 			console.error('Error updating data:', err);
+		} finally {
+			// Sync temporary state with confirmed changes
+			tempActiveState = dbSettings.clusterlists.map(cluster => cluster.active);
+			showPopup = false;
+			popupClusterIndex = null;
+		}
+	}
+
+	async function handleCheckboxChange(clusterIndex: number) {
+		openPopup(clusterIndex);
+	}
+
+	function handleRowClick(event: MouseEvent, clusterName: string) {
+		// Check if the click originated from an input element (checkbox)
+		if ((event.target as HTMLElement).tagName.toLowerCase() !== 'input') {
+			openClusterEditPage(clusterName);
 		}
 	}
 
@@ -42,6 +104,21 @@
 		goto(`/Data_Base/${encodeURIComponent(clusterName)}`);
 	}
 </script>
+
+<style>
+    .popup-overlay {
+        position: fixed; /* Keeps the overlay fixed relative to the viewport */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: flex;
+        justify-content: center; /* Centers the popup horizontally */
+        align-items: center; /* Centers the popup vertically */
+        z-index: 1000;
+    }
+</style>
 
 <title>DB Settings</title>
 
@@ -62,20 +139,20 @@
 			</thead>
 			<tbody>
 			{#each dbSettings.clusterlists as cluster, index}
-				<tr on:click={() => openClusterEditPage(cluster.listname)}>
+				<tr on:click={(event) => handleRowClick(event, cluster.listname)}>
 					<td>{cluster.listname}</td>
 					<td>
 						<input
 							type="checkbox"
-							bind:checked={cluster.active}
-							on:click|stopPropagation={() => handleCheckboxChange(index, 'active', cluster.active)}
+							checked={tempActiveState[index]}
+							on:change|stopPropagation={() => handleCheckboxChange(index)}
 						/>
 					</td>
 					<td>
 						<input
 							type="checkbox"
-							bind:checked={cluster.production}
-							on:click|stopPropagation={() => handleCheckboxChange(index, 'production', cluster.production)}
+							checked={cluster.production}
+							on:change|stopPropagation={(e) => handleCheckboxChange(index)}
 						/>
 					</td>
 					<td>
@@ -100,5 +177,18 @@
 		</table>
 	{:else}
 		<p id="db-settings-loading">Loading...</p>
+	{/if}
+
+	{#if showPopup}
+		<div class="popup-overlay" on:click={closePopup}>
+			<div class="popup-box">
+				<button class="close" on:click={closePopup}>&times;</button>
+				<h2>Confirm Active Change</h2>
+				<p>Are you sure you want to change the active database?</p>
+
+				<button class="submit" style="background-color: green; color: white" on:click={confirmActiveChange}>Yes</button>
+				<button class="submit" style="background-color: red; color: white" on:click={closePopup}>No</button>
+			</div>
+		</div>
 	{/if}
 </section>
