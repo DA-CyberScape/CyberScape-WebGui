@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import './styles.css';
 	import { goto } from '$app/navigation';
+	import { redirect } from '@sveltejs/kit';
 
 	interface Cluster {
 		listname: string;
@@ -90,8 +91,21 @@
 	}
 
 	async function handleCheckboxChange(clusterIndex: number) {
+		if (!dbSettings) return;
+
+		// Find the currently active cluster index
+		const currentlyActiveIndex = dbSettings.clusterlists.findIndex(cluster => cluster.active);
+
+		// Prevent deactivation of the only active cluster
+		if (currentlyActiveIndex === clusterIndex && dbSettings.clusterlists[clusterIndex].active) {
+			location.reload();
+			return;
+		}
+
+		// Open confirmation popup for a valid activation request
 		openPopup(clusterIndex);
 	}
+
 
 	function handleRowClick(event: MouseEvent, clusterName: string) {
 		// Check if the click originated from an input element (checkbox)
@@ -142,6 +156,7 @@
 				<tr on:click={(event) => handleRowClick(event, cluster.listname)}>
 					<td>{cluster.listname}</td>
 					<td>
+						<!-- Active Checkbox -->
 						<input
 							type="checkbox"
 							checked={tempActiveState[index]}

@@ -52,7 +52,7 @@
 		for (let i = 0; i < clusterToEdit.list.length; i++) {
 			const ip = clusterToEdit.list[i];
 			if (!validateIP(ip)) {
-				validationErrors[`ip-${i}`] = `Invalid IP address: ${ip}`;
+				validationErrors[`ip-${i}`] = `Invalid IP address`;
 			}
 		}
 
