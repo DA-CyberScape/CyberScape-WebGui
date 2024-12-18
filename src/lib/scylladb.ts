@@ -1,5 +1,6 @@
 import yaml from 'yaml';
-const { parse } = yaml;
+
+const { parse, stringify } = yaml;
 
 const dbSettingsString: string =
 	'clusterlists:\n' +
@@ -28,13 +29,33 @@ try {
 	console.error('Error parsing settings string:', error);
 }
 
+// Export the parsed settings object
 export { dbObject as dbSettings };
 
+// Function to update settings
 export function updateSettings(newSetting: string) {
 	try {
-		const newSettingObject = JSON.parse(newSetting);
-		Object.assign(dbObject, newSettingObject);
+		// Parse new setting from YAML string to object
+		const newSettingObject = parse(newSetting);
+
+		// Ensure the structure of newSettingObject is valid before merging
+		if (newSettingObject && newSettingObject.clusterlists) {
+			// Update the dbObject with the new setting
+			Object.assign(dbObject, newSettingObject);
+		} else {
+			console.error('Invalid setting structure:', newSetting);
+		}
 	} catch (error) {
 		console.error('Error updating settings:', error);
+	}
+}
+
+// Optionally, you can provide a function to stringify the updated dbObject back to YAML
+export function stringifySettings(): string {
+	try {
+		return stringify(dbObject);
+	} catch (error) {
+		console.error('Error converting settings to YAML:', error);
+		return '';
 	}
 }
