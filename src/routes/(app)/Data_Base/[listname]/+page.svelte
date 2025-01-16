@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import './styles.css';
+	import { goto } from '$app/navigation';
 
 	let dbSettings: any = null;
 	let error: string | null = null;
@@ -53,73 +54,76 @@
 		}
 	}
 
+async function updateData() {
+    validationErrors = {}; // Reset validation errors
+    let ipTracker = new Set<string>(); // Track unique IPs
+    let hasDuplicates = false;
 
-	async function updateData() {
-		validationErrors = {}; // Reset validation errors
-		let ipTracker = new Set<string>(); // Track unique IPs
-		let hasDuplicates = false;
+    // Remove empty IP fields before submission
+    clusterToEdit.list = clusterToEdit.list.filter((ip: string) => ip.trim() !== '');
 
-		// Validate all IP addresses except the last one
-		for (let i = 0; i < clusterToEdit.list.length - 1; i++) {
-			const ip = clusterToEdit.list[i].trim();
+    // Validate all IP addresses
+    for (let i = 0; i < clusterToEdit.list.length; i++) {
+        const ip = clusterToEdit.list[i].trim();
 
-			// Validate IP syntax
-			if (!validateIP(ip)) {
-				validationErrors[`ip-${i}`] = `Invalid IP address`;
-			}
+        // Validate IP syntax
+        if (!validateIP(ip)) {
+            validationErrors[`ip-${i}`] = `Invalid IP address`;
+        }
 
-			// Check for duplicate IPs
-			if (ipTracker.has(ip)) {
-				validationErrors[`ip-${i}`] = `Duplicate IP address`;
-				hasDuplicates = true;
-			} else {
-				ipTracker.add(ip);
-			}
-		}
+        // Check for duplicate IPs
+        if (ipTracker.has(ip)) {
+            validationErrors[`ip-${i}`] = `Duplicate IP address`;
+            hasDuplicates = true;
+        } else {
+            ipTracker.add(ip);
+        }
+    }
 
-		if (Object.keys(validationErrors).length > 0 || hasDuplicates) {
-			addEmptyFieldIfNeeded(); // Ensure there's an empty field even if validation fails
-			return;
-		}
+    // If there are validation errors or duplicate IPs, stop and re-add the empty IP field
+    if (Object.keys(validationErrors).length > 0 || hasDuplicates) {
+        // Re-add an empty field for user to input IP
+        addEmptyFieldIfNeeded();
+        return;
+    }
 
-		const filteredList = clusterToEdit.list.filter((ip: string) => ip.trim() !== '');
+    // If the current cluster is marked as active, deactivate all others
+    if (clusterToEdit.active) {
+        dbSettings.clusterlists = dbSettings.clusterlists.map((cluster: any) => ({
+            ...cluster,
+            active: cluster === clusterToEdit // Only the current cluster remains active
+        }));
+    }
 
-		// If the current cluster is marked as active, deactivate all others
-		if (clusterToEdit.active) {
-			dbSettings.clusterlists = dbSettings.clusterlists.map((cluster: any) => ({
-				...cluster,
-				active: cluster === clusterToEdit // Only the current cluster remains active
-			}));
-		}
+    // Proceed with updating the data, using the cleaned list
+    try {
+        const response = await fetch('/api/db', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...dbSettings,
+                clusterlists: dbSettings.clusterlists.map((cluster: any) =>
+                    cluster === clusterToEdit
+                        ? { ...clusterToEdit, list: clusterToEdit.list }
+                        : cluster
+                )
+            })
+        });
 
-		// Proceed with updating the data
-		try {
-			const response = await fetch('/api/db', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					...dbSettings,
-					clusterlists: dbSettings.clusterlists.map((cluster: any) =>
-						cluster === clusterToEdit
-							? { ...clusterToEdit, list: filteredList }
-							: cluster
-					)
-				})
-			});
+        if (!response.ok) {
+            throw new Error(`Failed to update data: ${response.statusText}`);
+        }
 
-			if (!response.ok) {
-				throw new Error(`Failed to update data: ${response.statusText}`);
-			}
-
-			alert('Cluster settings updated successfully!');
-		} catch (err) {
-			error = err.message;
-			console.error('Error updating data:', err);
-		} finally {
-			// Ensure the empty field is re-added
-			addEmptyFieldIfNeeded();
-		}
-	}
+        alert('Cluster settings updated successfully!');
+				goto('/Data_Base');
+    } catch (err) {
+        error = err.message;
+        console.error('Error updating data:', err);
+    } finally {
+        // Ensure the empty field is re-added after submission if needed
+        addEmptyFieldIfNeeded();
+    }
+}
 
 	// Get the selected cluster name from the URL
 	let listname: string = '';
