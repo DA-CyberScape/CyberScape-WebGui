@@ -90,20 +90,46 @@
 		}
 	}
 
-	async function handleCheckboxChange(clusterIndex: number) {
+	async function handleCheckboxChange(clusterIndex: number, isActiveCheckbox: boolean) {
 		if (!dbSettings) return;
 
-		// Find the currently active cluster index
-		const currentlyActiveIndex = dbSettings.clusterlists.findIndex(cluster => cluster.active);
+		if (isActiveCheckbox) {
+			// Handle the "Active" checkbox logic
+			const currentlyActiveIndex = dbSettings.clusterlists.findIndex(cluster => cluster.active);
 
-		// Prevent deactivation of the only active cluster
-		if (currentlyActiveIndex === clusterIndex && dbSettings.clusterlists[clusterIndex].active) {
-			location.reload();
-			return;
+			// Prevent deactivation of the only active cluster
+			if (currentlyActiveIndex === clusterIndex && dbSettings.clusterlists[clusterIndex].active) {
+				location.reload(); // Or skip the popup logic entirely
+				return;
+			}
+
+			// Open confirmation popup for a valid activation request
+			openPopup(clusterIndex);
+		} else {
+			// Handle the "Production" checkbox logic directly without a popup
+			try {
+				dbSettings = {
+					...dbSettings,
+					clusterlists: dbSettings.clusterlists.map((cluster, index) => ({
+						...cluster,
+						production: index === clusterIndex ? !cluster.production : cluster.production
+					}))
+				};
+
+				// Persist the change
+				const response = await fetch('/api/db', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(dbSettings)
+				});
+				if (!response.ok) {
+					throw new Error(`Failed to update data: ${response.statusText}`);
+				}
+			} catch (err) {
+				error = err instanceof Error ? err.message : 'Unknown error';
+				console.error('Error updating data:', err);
+			}
 		}
-
-		// Open confirmation popup for a valid activation request
-		openPopup(clusterIndex);
 	}
 
 
@@ -160,14 +186,15 @@
 						<input
 							type="checkbox"
 							checked={tempActiveState[index]}
-							on:change|stopPropagation={() => handleCheckboxChange(index)}
+							on:change|stopPropagation={() => handleCheckboxChange(index, true)}
 						/>
 					</td>
 					<td>
+						<!-- Production Checkbox -->
 						<input
 							type="checkbox"
 							checked={cluster.production}
-							on:change|stopPropagation={(e) => handleCheckboxChange(index)}
+							on:change|stopPropagation={() => handleCheckboxChange(index, false)}
 						/>
 					</td>
 					<td>

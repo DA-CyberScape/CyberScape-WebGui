@@ -40,7 +40,7 @@
 #db-settings-table th:nth-child(3),
 #db-settings-table td:nth-child(2),
 #db-settings-table td:nth-child(3) {
-    width: 75px;
+    width: 90px;
     text-align: center;
 }
 

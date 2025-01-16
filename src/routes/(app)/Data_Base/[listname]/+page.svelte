@@ -31,7 +31,7 @@
 		}
 	}
 
-	// Validate IP address (simple regex for demonstration)
+	// Validate IP address
 	function validateIP(ip: string): boolean {
 		const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 		return regex.test(ip);
@@ -40,6 +40,12 @@
 	// Add an empty field if the last field is not empty
 	function addEmptyFieldIfNeeded() {
 		if (clusterToEdit?.list) {
+			// Remove all empty fields except the last one
+			clusterToEdit.list = clusterToEdit.list.filter((ip: string, index: number) =>
+				ip.trim() !== '' || index === clusterToEdit.list.length - 1
+			);
+
+			// Add an empty field if the last field is not empty
 			const lastIP = clusterToEdit.list[clusterToEdit.list.length - 1];
 			if (lastIP.trim() !== '') {
 				clusterToEdit.list.push('');
@@ -78,6 +84,14 @@
 
 		const filteredList = clusterToEdit.list.filter((ip: string) => ip.trim() !== '');
 
+		// If the current cluster is marked as active, deactivate all others
+		if (clusterToEdit.active) {
+			dbSettings.clusterlists = dbSettings.clusterlists.map((cluster: any) => ({
+				...cluster,
+				active: cluster === clusterToEdit // Only the current cluster remains active
+			}));
+		}
+
 		// Proceed with updating the data
 		try {
 			const response = await fetch('/api/db', {
@@ -86,7 +100,9 @@
 				body: JSON.stringify({
 					...dbSettings,
 					clusterlists: dbSettings.clusterlists.map((cluster: any) =>
-						cluster === clusterToEdit ? { ...clusterToEdit, list: filteredList } : cluster
+						cluster === clusterToEdit
+							? { ...clusterToEdit, list: filteredList }
+							: cluster
 					)
 				})
 			});
@@ -162,7 +178,11 @@
 						type="checkbox"
 						id="active"
 						bind:checked={clusterToEdit.active}
+						disabled={clusterToEdit.active}
 					/>
+					{#if clusterToEdit.active}
+						<p style="color: red">This database is currently active and cannot be deactivated.</p>
+					{/if}
 				</div>
 
 				<!-- Production Checkbox -->
