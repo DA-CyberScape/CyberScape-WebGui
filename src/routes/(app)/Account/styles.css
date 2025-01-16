@@ -1,5 +1,4 @@
 @import "../../colors.css";
-@import "../../popup.css";
 
 h1 {
     color: var(--text);
@@ -13,3 +12,103 @@ h2 {
     margin-left: 40px;
 }
 
+p {
+    color: var(--text);
+    margin-left: 40px;
+    font-size: 20px;
+}
+
+.AccountButton {
+    background-color: var(--accent);
+    border: none;
+    color: black;
+    margin-left: 30px;
+    font-size: 16px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 250px;
+    height: 30px;
+    cursor: pointer;
+    margin-right: 20px;
+    outline: none;
+}
+
+.AccountButton:hover {
+    background-color: #e18e0e;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 100px;
+    min-width: 200px;
+}
+
+.formcontainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    background: var(--background);
+    padding: 20px;
+    border-radius: 25px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.popup-box h2 {
+    margin: 0 0 35px;
+    padding: 0;
+    color: var(--accent);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/* Ensure the label floats on focus or when input is not empty */
+.user-box {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+/* Style for the input field */
+.user-box input {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 30px;
+    border: none;
+    border-bottom: 2px solid var(--text);
+    outline: none;
+    background: transparent;
+}
+
+/* Label styling */
+.user-box label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px 0;
+    margin-left: 0;
+    font-size: 16px;
+    color: var(--text);
+    pointer-events: none;
+    transition: 0.5s ease;
+}
+
+/* Move label up on focus or when input is valid (not empty) */
+.user-box input:focus ~ label,
+.user-box input:not(:placeholder-shown) ~ label {
+    transform: translateY(-20px); /* Move label up */
+    font-size: 14px; /* Smaller font */
+    color: var(--text); /* Label color */
+}
+
+/* When input is empty, keep label in the original position */
+.user-box input:placeholder-shown ~ label {
+    transform: translateY(0); /* Keep label in place */
+    font-size: 16px; /* Default font size */
+    color: var(--text); /* Default color */
+}

@@ -1,10 +1,60 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import './styles.css';
 
 	export let data: PageData;
 
 	const { user } = data;
+
+	let errorMessage: string = '';
+	let successMessage: string = '';
+	let showPasswdPopup: boolean = false;
+	let showUsernamePopup: boolean = false;
+
+	function changePassword() {
+		// Add password change logic
+	}
+
+	function changeUsername() {
+		// Add username change logic
+	}
+
+	function openPasswdPopup() {
+		showPasswdPopup = true;
+	}
+
+	function closePasswdPopup() {
+		showPasswdPopup = false;
+	}
+
+	function openUsernamePopup() {
+		showUsernamePopup = true;
+	}
+
+	function closeUsernamePopup() {
+		showUsernamePopup = false;
+	}
+
+	// Stop propagation for clicks inside the popup
+	function stopClickPropagation(event: MouseEvent) {
+		event.stopPropagation();
+	}
 </script>
+
+<style>
+    .popup-overlay {
+        position: fixed; /* Keeps the overlay fixed relative to the viewport */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: flex;
+        justify-content: center; /* Centers the popup horizontally */
+        align-items: center; /* Centers the popup vertically */
+        z-index: 1000;
+    }
+</style>
 
 <svelte:head>
 	<title>Account</title>
@@ -14,10 +64,74 @@
 	<div>
 		<h1>Account</h1>
 
-		<p style="color: white">Hello {user.username}</p>
+		{#if user}
+			<p style="color: white">Logged in as <b><i>{user.username}</i></b></p>
+		{:else}
+			<p style="color: red;">User not logged in</p>
+		{/if}
 	</div>
 
-	<form method="POST" action="?/logout">
-		<button type="submit" name="logout" value="true">Logout</button>
-	</form>
+	<div class="form-group">
+		<div class="formcontainer">
+
+			<h2>Change Username</h2>
+			<button class="AccountButton" on:click={openUsernamePopup}>Change Username</button>
+
+			<h2>Change Password</h2>
+			<button class="AccountButton" on:click={openPasswdPopup}>Change Password</button>
+
+			<h2>Logout</h2>
+			<form method="POST" action="?/logout">
+				<button class="AccountButton" type="submit" name="logout" value="true">Logout</button>
+			</form>
+		</div>
+	</div>
+
+	{#if showUsernamePopup}
+		<div class="popup-overlay" on:click={closeUsernamePopup}>
+			<div class="popup-box" on:click={stopClickPropagation}>
+				<button class="close" on:click={closeUsernamePopup}>&times;</button>
+				<h2>Change your username</h2>
+
+				<div class="user-box">
+					<input type="text" name="username" id="username" autocomplete="username">
+					<label for="username">New Username</label>
+				</div>
+
+				<button class="submit" style="background-color: red; color: white" on:click={closeUsernamePopup}>Abort</button>
+				<button class="submit" style="background-color: green; color: white" on:click={changeUsername}>Update Username
+				</button>
+			</div>
+		</div>
+	{/if}
+
+	{#if showPasswdPopup}
+		<div class="popup-overlay" on:click={closePasswdPopup}>
+			<div class="popup-box" on:click={stopClickPropagation}>
+				<button class="close" on:click={closePasswdPopup}>&times;</button>
+				<h2>Change your password</h2>
+				<form>
+					<div class="user-box">
+						<input type="password" name="NewPassword" id="NewPassword" autocomplete="current-password">
+						<label for="password">Old Password</label>
+					</div>
+
+					<div class="user-box">
+						<input type="password" name="OldPassword" id="OldPassword" autocomplete="new-password">
+						<label for="password">New Password</label>
+					</div>
+
+					<div class="user-box">
+						<input type="password" name="ConfirmPassword" id="ConfirmPassword" autocomplete="new-password">
+						<label for="password">Confirm new Password</label>
+					</div>
+
+					<button class="submit" style="background-color: red; color: white" on:click={closePasswdPopup}>Abort</button>
+					<button class="submit" style="background-color: green; color: white" on:click={changePassword}>Update Password
+					</button>
+				</form>
+			</div>
+		</div>
+	{/if}
+
 </section>
