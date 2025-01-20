@@ -35,7 +35,7 @@ export const actions: Actions = {
 			data: { username: newUsername }
 		});
 
-		return { success: 'Your username has been updated successfully.' };
+		throw redirect(302, '/Account');
 	},
 	// Action to handle password update
 	updatePassword: async (event) => {

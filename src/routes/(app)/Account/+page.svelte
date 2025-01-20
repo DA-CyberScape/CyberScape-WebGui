@@ -6,10 +6,10 @@
 
 	const { user } = data;
 
-	let errorMessage: string = '';
 	let showPasswdPopup: boolean = false;
 	let showUsernamePopup: boolean = false;
 
+	// Functions to open and close popups
 	function openPasswdPopup() {
 		showPasswdPopup = true;
 	}
@@ -26,7 +26,7 @@
 		showUsernamePopup = false;
 	}
 
-	// Stop propagation for clicks inside the popup
+	// Stop propagation for clicks inside the popup to avoid closing
 	function stopClickPropagation(event: MouseEvent) {
 		event.stopPropagation();
 	}
@@ -64,7 +64,6 @@
 
 	<div class="form-group">
 		<div class="formcontainer">
-
 			<h2>Change Username</h2>
 			<button class="AccountButton" on:click={openUsernamePopup}>Change Username</button>
 
@@ -82,11 +81,8 @@
 		<div class="popup-overlay" on:click={closeUsernamePopup}>
 			<div class="popup-box" on:click={stopClickPropagation}>
 				<button class="close" on:click={closeUsernamePopup}>&times;</button>
-
 				<h2>Change your username</h2>
-
 				<form method="POST" action="?/updateUsername">
-
 					<div class="user-box">
 						<input type="text" name="username" id="username" autocomplete="username" required>
 						<label for="username">New Username</label>
@@ -105,7 +101,6 @@
 			<div class="popup-box" on:click={stopClickPropagation}>
 				<button class="close" on:click={closePasswdPopup}>&times;</button>
 				<h2>Change your password</h2>
-
 				<form method="POST" action="?/updatePassword">
 
 					<input type="text" name="username" id="username" autocomplete="username" hidden>
@@ -113,23 +108,17 @@
 
 					<div class="user-box">
 						<input type="password" name="OldPassword" id="OldPassword" autocomplete="current-password" required>
-						<label for="password">Old Password</label>
+						<label for="OldPassword">Old Password</label>
 					</div>
 
 					<div class="user-box">
 						<input type="password" name="NewPassword" id="NewPassword" autocomplete="new-password" required>
-						<label for="password">New Password</label>
+						<label for="NewPassword">New Password</label>
 					</div>
 
 					<div class="user-box">
 						<input type="password" name="ConfirmPassword" id="ConfirmPassword" autocomplete="new-password" required>
-						<label for="password">Confirm new Password</label>
-					</div>
-
-					<div class="error-message" style="color: red;">
-						{#if errorMessage}
-							<p>{errorMessage}</p>
-						{/if}
+						<label for="ConfirmPassword">Confirm New Password</label>
 					</div>
 
 					<button class="submit" style="background-color: red; color: white" on:click={closePasswdPopup}>Abort</button>
@@ -138,5 +127,4 @@
 			</div>
 		</div>
 	{/if}
-
 </section>
