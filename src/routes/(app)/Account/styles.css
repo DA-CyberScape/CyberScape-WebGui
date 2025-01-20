@@ -106,9 +106,16 @@ p {
     color: var(--text); /* Label color */
 }
 
-/* When input is empty, keep label in the original position */
 .user-box input:placeholder-shown ~ label {
     transform: translateY(0); /* Keep label in place */
     font-size: 16px; /* Default font size */
     color: var(--text); /* Default color */
+}
+
+button {
+    cursor: pointer;
+}
+
+input[type="submit"] {
+    cursor: pointer;
 }

@@ -6,40 +6,76 @@ import type { Actions } from './$types';
 const db = new PrismaClient();
 
 export const actions: Actions = {
-	// Action to handle user update (username and/or password change)
-	update: async (event) => {
+	// Action to handle username update
+	updateUsername: async (event) => {
 		const { user } = event.locals;
+
+		// Ensure the user is logged in
 		if (!user) {
-			return fail(400, { error: 'You must be logged in to update your account.' });
+			return fail(400, { error: 'You must be logged in to update your username.' });
 		}
 
 		const formData = await event.request.formData();
-		const newUsername = formData.get('newUsername')?.toString();
-		const newPassword = formData.get('newPassword')?.toString();
+		const newUsername = formData.get('username')?.toString();
 
-		const updateData: { username?: string; password?: string } = {};
-
-		// Check for a new username
-		if (newUsername) {
-			const existingUser = await db.user.findUnique({ where: { username: newUsername } });
-			if (existingUser) {
-				return fail(400, { error: 'Username is already taken.' });
-			}
-			updateData.username = newUsername;
+		// Validate the new username
+		if (!newUsername || newUsername.trim().length === 0) {
+			return fail(400, { error: 'New username cannot be empty.' });
 		}
 
-		// Check for a new password
-		if (newPassword) {
-			updateData.password = await bcrypt.hash(newPassword, 10);
+		// Check if the username is already taken
+		const existingUser = await db.user.findUnique({ where: { username: newUsername } });
+		if (existingUser) {
+			return fail(400, { error: 'Username is already taken.' });
 		}
 
-		// Update the user's data in the database
+		// Update the username in the database
 		await db.user.update({
 			where: { id: user.id },
-			data: updateData
+			data: { username: newUsername }
 		});
 
-		return { success: 'Your account has been updated successfully.' };
+		return { success: 'Your username has been updated successfully.' };
+	},
+	// Action to handle password update
+	updatePassword: async (event) => {
+		const { user } = event.locals;
+
+		// Ensure the user is logged in
+		if (!user) {
+			return fail(400, { error: 'You must be logged in to update your password.' });
+		}
+
+		// Retrieve form data
+		const formData = await event.request.formData();
+		const oldPassword = formData.get('OldPassword')?.toString();
+		const newPassword = formData.get('NewPassword')?.toString();
+		const confirmPassword = formData.get('ConfirmPassword')?.toString();
+
+		// Validate passwords
+		if (!oldPassword || !newPassword || !confirmPassword) {
+			return fail(400, { error: 'All password fields are required.' });
+		}
+
+		// Verify the old password
+		const userRecord = await db.user.findUnique({ where: { id: user.id } });
+		if (!userRecord || !(await bcrypt.compare(oldPassword, userRecord.password))) {
+			return fail(400, { error: 'Incorrect old password.' });
+		}
+
+		// Ensure new passwords match
+		if (newPassword !== confirmPassword) {
+			return fail(400, { error: 'New password and confirmation password do not match.' });
+		}
+
+		// Hash the new password and update it in the database
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
+		await db.user.update({
+			where: { id: user.id },
+			data: { password: hashedPassword }
+		});
+
+		return { success: 'Your password has been updated successfully.' };
 	},
 
 	// Action to handle logging out
