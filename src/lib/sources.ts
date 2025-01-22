@@ -142,11 +142,11 @@ const structure: string =
 	'      "user": "string",\n' +
 	'      "authentication": {\n' +
 	'        "type": "string",\n' +
-	'        "enum": ["SHA", "SHA1", "MD5"]\n' +
+	'        "enum": ["MD5", "SHA1", "SHA256", "SHA384", "SHA512"]\n' +
 	'      },\n' +
 	'      "encryption": {\n' +
 	'        "type": "string",\n' +
-	'        "enum": ["AES", "AES128", "DES", "3DES"]\n' +
+	'        "enum": ["AES", "AES192","AES256", "DES"]\n' +
 	'      },\n' +
 	'      "authpass": "string",\n' +
 	'      "privpass": "string",\n' +
