@@ -118,7 +118,7 @@ let sources: string =
 	'    "snmpTrapReceiver": [\n' +
 	'      {\n' +
 	'        "name": "SNMP-Trap-Receiver",\n' +
-	'        "id": 123123,\n' +
+	'        "id": 123173,\n' +
 	'        "port": 162\n' +
 	'      }\n' +
 	'    ]\n' +
