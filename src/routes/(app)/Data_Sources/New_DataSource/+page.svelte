@@ -151,6 +151,18 @@
 		}
 	}
 
+	function handleCheckboxChange(index: number, isChecked: boolean) {
+		if (isChecked) {
+			if (!oids[index].oid.endsWith('.x')) {
+				oids[index].oid += '.x';
+			}
+		} else {
+			if (oids[index].oid.endsWith('.x')) {
+				oids[index].oid = oids[index].oid.slice(0, -2); // Remove `.x`
+			}
+		}
+	}
+
 	function getInputType(key: string) {
 		function findFieldType(obj: any): string | null {
 			if (obj && typeof obj === 'object') {
@@ -192,7 +204,6 @@
 			}
 		}
 	}
-
 </script>
 
 <title>New {type} Data Source</title>
@@ -226,7 +237,6 @@
 											id={`oid-${index}`}
 											name={`oid-${index}`}
 											bind:value={oid.oid}
-											required
 											on:input={() => handleInputChange(index)}
 										/>
 									</div>
@@ -238,10 +248,20 @@
 											id={`name-${index}`}
 											name={`name-${index}`}
 											bind:value={oid.name}
-											required
 											on:input={() => handleInputChange(index)}
 										/>
 									</div>
+
+									<div class="form-group" id="styled-box">
+										<label>
+											<input
+												type="checkbox"
+												on:change={(event) => handleCheckboxChange(index, event.target.checked)}
+											/>
+											SNMP Walk
+										</label>
+									</div>
+
 								</div>
 							{/each}
 						</div>

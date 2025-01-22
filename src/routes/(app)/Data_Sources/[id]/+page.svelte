@@ -114,6 +114,18 @@
 		return findEnumOptions(dataStructure) || [];
 	}
 
+	function handleCheckboxChange(index: number, isChecked: boolean) {
+		if (isChecked) {
+			if (!oids[index].oid.endsWith('.x')) {
+				oids[index].oid += '.x';
+			}
+		} else {
+			if (oids[index].oid.endsWith('.x')) {
+				oids[index].oid = oids[index].oid.slice(0, -2); // Remove `.x`
+			}
+		}
+	}
+
 
 	function updateDataSource() {
 		const filteredOids = oids.filter(oid => oid.oid && oid.name);
@@ -132,8 +144,6 @@
 			}
 		}
 
-		console.log('Updated Data Source:', updatedDataSource);
-
 		if (dataSources) {
 			for (const sourceItem of dataSources) {
 				for (const sourceKey in sourceItem) {
@@ -148,6 +158,7 @@
 				}
 			}
 		}
+
 
 		fetch('/api/sources', {
 			method: 'POST',
@@ -215,6 +226,18 @@
 												on:input={() => handleInputChange(index)}
 											/>
 										</div>
+
+										<div class="form-group" id="styled-box">
+											<label>
+												<input
+													type="checkbox"
+													checked={oids[index].oid.endsWith('.x')}
+													on:change={(event) => handleCheckboxChange(index, event.target.checked)}
+												/>
+												SNMP Walk
+											</label>
+										</div>
+
 									</div>
 								{/each}
 							</div>

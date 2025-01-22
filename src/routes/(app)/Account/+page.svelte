@@ -84,11 +84,11 @@
 				<h2>Change your username</h2>
 				<form method="POST" action="?/updateUsername">
 					<div class="user-box">
-						<input type="text" name="username" id="username" autocomplete="username" required>
+						<input type="text" name="username" id="username" autocomplete="username" required >
 						<label for="username">New Username</label>
 					</div>
 
-					<button class="submit" style="background-color: red; color: white" on:click={closeUsernamePopup}>Abort
+					<button type="button" class="submit" style="background-color: red; color: white" on:click={closeUsernamePopup}>Abort
 					</button>
 					<input type="submit" class="submit" style="background-color: green; color: white" value="Update Username">
 				</form>
@@ -121,7 +121,7 @@
 						<label for="ConfirmPassword">Confirm New Password</label>
 					</div>
 
-					<button class="submit" style="background-color: red; color: white" on:click={closePasswdPopup}>Abort</button>
+					<button type="button" class="submit" style="background-color: red; color: white" on:click={closePasswdPopup}>Abort</button>
 					<input type="submit" class="submit" style="background-color: green; color: white" value="Update Password">
 				</form>
 			</div>
