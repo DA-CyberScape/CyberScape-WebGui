@@ -6,9 +6,9 @@ export const load: PageServerLoad = (event: any) => {
 	const user = event.locals.user;
 
 	console.log('Load function: Checking user session...');
-	if (!user) {
-		console.log('User not found in session. Redirecting to login.');
-		throw redirect(302, '/login');
+	if (user) {
+		console.log('User found in session. Redirecting to home.');
+		throw redirect(302, '/');
 	}
 
 	console.log('User found in session. Redirecting to home page.');
