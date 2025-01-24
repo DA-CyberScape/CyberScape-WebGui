@@ -8,12 +8,9 @@ export const load: PageServerLoad = (event: any) => {
 	console.log('Load function: Checking user session...');
 
 	if (user) {
-		console.log('User found in session. Redirecting to home.');
-		throw redirect(302, '/');
+		console.log('User found in session. Redirecting to home page.');
+		throw redirect(302, '/?reload=true');
 	}
-
-	console.log('User found in session. Redirecting to home page.');
-	throw redirect(302, '/?reload=true');
 };
 
 export const actions: Actions = {
