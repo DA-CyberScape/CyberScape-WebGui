@@ -7,6 +7,10 @@ const config = {
 
 	kit: {
 		adapter: adapter(),
+		paths: {
+			// Set the base path if your app is served at a subdirectory
+			base: ''
+		},
 		prerender: {
 			handleHttpError: (error) => {
 				if (error.status === 401) {
