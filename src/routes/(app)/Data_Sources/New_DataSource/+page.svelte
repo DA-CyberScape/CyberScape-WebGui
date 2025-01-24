@@ -17,9 +17,10 @@
 	onMount(async () => {
 		try {
 			await fetchDataStructure();
+			await filterAvailableTypes();
 			initializeNewDataSource();
 		} catch (error) {
-			console.error('Error fetching data structure:', error);
+			console.error('Error during onMount:', error);
 		}
 	});
 
@@ -30,6 +31,26 @@
 		}
 		dataStructure = await response.json();
 		availableTypes = Object.keys(dataStructure);
+	}
+
+	async function filterAvailableTypes() {
+		try {
+			const response = await fetch('/api/sources');
+			if (!response.ok) {
+				throw new Error(`Failed to fetch existing sources: ${response.statusText}`);
+			}
+			const existingDataSources = await response.json();
+
+			// Check if "Syslog" or "snmpTrapReceiver" already exist and remove them if necessary
+			const existingTypes = new Set(
+				existingDataSources.flatMap((section: any) => Object.keys(section))
+			);
+			availableTypes = availableTypes.filter(
+				(type) => type !== 'Syslog' && type !== 'snmpTrapReceiver' || !existingTypes.has(type)
+			);
+		} catch (error) {
+			console.error('Error filtering available types:', error);
+		}
 	}
 
 	async function initializeNewDataSource() {

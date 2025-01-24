@@ -41,9 +41,11 @@
 		{#each dataSources as sourceItem}
 			{#each Object.keys(sourceItem) as sourceKey}
 				<h2>{sourceKey}</h2>
-				<button class="addSourceButton" on:click={() => goto(`/Data_Sources/New_DataSource?type=${sourceKey}`)}>
-					+ Add new
-				</button>
+				{#if (sourceKey !== 'Syslog' && sourceKey !== 'snmpTrapReceiver') || sourceItem[sourceKey]?.length === 0}
+					<button class="addSourceButton" on:click={() => goto(`/Data_Sources/New_DataSource?type=${sourceKey}`)}>
+						+ Add new
+					</button>
+				{/if}
 				{#if sourceItem[sourceKey] && Array.isArray(sourceItem[sourceKey]) && sourceItem[sourceKey].length > 0}
 					<table>
 						<thead>

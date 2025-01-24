@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import './sytles.css';
+	import './styles.css';
 
 	let hosts = [];
 	let newHostname = '';
 	let newIpAddress = '';
+	let errorMessage = ''; // To store the validation error message
+	let invalidHostname = false; // Tracks if hostname input is invalid
+	let invalidIpAddress = false; // Tracks if IP address input is invalid
 
 	// Fetch hosts from the backend API
 	async function getHosts() {
@@ -22,33 +25,75 @@
 		}
 	}
 
+	// Validate IP Address
+	function isValidIP(ip: string): boolean {
+		const ipRegex =
+			/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+		return ipRegex.test(ip);
+	}
+
+
 	// Add a new host
 	async function addHost() {
-		if (newHostname.trim() && newIpAddress.trim()) {
-			const newHost = { hostname: newHostname, ipAddress: newIpAddress };
-			try {
-				const res = await fetch('/api/hosts', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(newHost)
-				});
-				if (res.ok) {
-					const responseData = await res.json();
-					if (responseData.hosts) {
-						hosts = responseData.hosts; // Use updated hosts from the server
-						newHostname = ''; // Clear the input fields
-						newIpAddress = '';
-					} else {
-						console.error('Failed to get updated hosts data');
-					}
-				} else {
-					console.error('Failed to add host');
-				}
-			} catch (error) {
-				console.error('Error adding host:', error);
+		// Reset validation states
+		invalidHostname = false;
+		invalidIpAddress = false;
+		errorMessage = '';
+
+		if (!newHostname.trim()) {
+			invalidHostname = true;
+			errorMessage = 'Hostname is required.';
+			return;
+		}
+
+		if (!newIpAddress.trim()) {
+			invalidIpAddress = true;
+			errorMessage = 'IP Address is required.';
+			return;
+		}
+
+		if (!isValidIP(newIpAddress)) {
+			invalidIpAddress = true;
+			errorMessage = 'Please enter a valid IP address.';
+			return;
+		}
+
+		// Check for duplicate IP address
+		if (hosts.some((host) => host.ipAddress === newIpAddress)) {
+			invalidIpAddress = true;
+			errorMessage = 'The IP address already exists in the list.';
+			return;
+		}
+
+		const newHost = { hostname: newHostname, ipAddress: newIpAddress };
+
+		try {
+			const res = await fetch('/api/hosts', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(newHost)
+			});
+
+			// Log the response status and body for debugging
+			if (!res.ok) {
+				const resBody = await res.text(); // Get the response body as text
+				console.error('Failed to add host. Response status:', res.status, 'Response body:', resBody);
+				errorMessage = `Failed to add host: ${res.status} - ${resBody}`;
+				return;
 			}
-		} else {
-			console.error('Hostname and IP Address are required');
+
+			const responseData = await res.json();
+			if (responseData.hosts) {
+				hosts = responseData.hosts; // Use updated hosts from the server
+				newHostname = ''; // Clear the input fields
+				newIpAddress = '';
+			} else {
+				errorMessage = 'Failed to get updated hosts data.';
+			}
+			location.reload(); // Reload the page to update the hosts list
+		} catch (error) {
+			console.error('Error adding host:', error);
+			errorMessage = 'Error adding host.';
 		}
 	}
 
@@ -86,7 +131,9 @@
 						type="text"
 						bind:value={newHostname}
 						placeholder="Hostname"
+						class={invalidHostname ? 'input-error' : ''}
 						on:keydown={(e) => e.key === 'Enter' && addHost()}
+						autofocus
 					/>
 				</td>
 				<td>
@@ -94,11 +141,15 @@
 						type="text"
 						bind:value={newIpAddress}
 						placeholder="IP Address"
+						class={invalidIpAddress ? 'input-error' : ''}
 						on:keydown={(e) => e.key === 'Enter' && addHost()}
 					/>
 				</td>
 			</tr>
 			</tbody>
 		</table>
+		{#if errorMessage}
+			<p class="error">{errorMessage}</p>
+		{/if}
 	{/if}
 </section>

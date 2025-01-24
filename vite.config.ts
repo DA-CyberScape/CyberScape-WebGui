@@ -1,10 +1,10 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
 	plugins: [sveltekit()],
-
-	test: {
-		include: ['src/**/*.{test,spec}.{js,ts}']
+	server: {
+		host: '0.0.0.0', // Bind to all IPs
+		port: 3000 // Port to run the app on
 	}
 });

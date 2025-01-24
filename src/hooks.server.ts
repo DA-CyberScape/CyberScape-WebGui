@@ -10,9 +10,11 @@ const handle: Handle = async ({ event, resolve }) => {
 	if (authCookie) {
 		// Remove Bearer prefix
 		const token = authCookie.split(' ')[1];
+		console.log('Extracted Token:', token); // Check if this is working
 
 		try {
 			const jwtUser = jwt.verify(token, JWT_ACCESS_SECRET);
+			console.log('JWT User:', jwtUser); // Log the decoded JWT payload
 			if (typeof jwtUser === 'string') {
 				throw new Error('Something went wrong');
 			}

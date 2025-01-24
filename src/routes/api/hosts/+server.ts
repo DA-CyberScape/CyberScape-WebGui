@@ -1,63 +1,66 @@
 import { json } from '@sveltejs/kit';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const hostsFilePath = path.resolve('$lib/hosts.json');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const hostsFilePath = path.resolve(__dirname, '../../../lib/hosts.json');
 
-// Read the hosts from the JSON file
+// Helper to validate IP addresses
+const isValidIP = (ip) =>
+	/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+		ip
+	);
+
 function readHosts() {
 	try {
 		const data = fs.readFileSync(hostsFilePath, 'utf-8');
-		return JSON.parse(data); // Return the parsed JSON data
+		return JSON.parse(data);
 	} catch (error) {
 		console.error('Error reading hosts file:', error);
-		return { assignments: [] }; // Return an empty structure if the file doesn't exist or can't be read
+		return { assignments: [] };
 	}
 }
 
-// Write the updated hosts back to the JSON file
-function writeHosts(updatedHosts: object) {
+function writeHosts(updatedHosts: any) {
 	try {
-		fs.writeFileSync(hostsFilePath, JSON.stringify(updatedHosts, null, 2));
+		const backupFilePath = `${hostsFilePath}.bak`;
+		fs.writeFileSync(backupFilePath, JSON.stringify(updatedHosts, null, 2));
+		fs.renameSync(backupFilePath, hostsFilePath);
 		console.log('Hosts file updated successfully.');
 	} catch (error) {
 		console.error('Error writing to hosts file:', error);
 	}
 }
 
-// Function to update the hosts (add new host and persist)
-function updateHosts(newHost: object) {
-	const hostsData = readHosts(); // Get the current hosts
-	hostsData.assignments.push(newHost); // Add the new host
-	writeHosts(hostsData); // Write the updated list back to the file
-	return hostsData; // Return the updated hosts data
+function updateHosts(newHost) {
+	const hostsData = readHosts();
+	hostsData.assignments.push(newHost);
+	writeHosts(hostsData);
+	return hostsData;
 }
 
-// GET request to fetch all hosts
 export const GET = async () => {
 	try {
-		const hosts = readHosts(); // Read hosts from the JSON file
-		return json(hosts); // Return the hosts as a JSON response
+		const hosts = readHosts();
+		return json(hosts);
 	} catch (error) {
 		console.error('Error fetching hosts:', error);
 		return json({ error: 'Error fetching hosts' }, { status: 500 });
 	}
 };
 
-// POST request to add a new host
 export const POST = async ({ request }) => {
 	try {
-		const newHost = await request.json(); // Get the new host data from the request body
-
-		// Validate the host data
+		const newHost = await request.json();
 		if (!newHost.hostname || !newHost.ipAddress) {
 			return json({ error: 'Hostname and IP address are required.' }, { status: 400 });
 		}
-
-		// Update the hosts (add the new host and save to the JSON file)
+		if (!isValidIP(newHost.ipAddress)) {
+			return json({ error: 'Invalid IP address.' }, { status: 400 });
+		}
 		const updatedHosts = updateHosts(newHost);
-
-		return json({ success: true, hosts: updatedHosts }); // Return the updated hosts data
+		return json({ success: true, hosts: updatedHosts });
 	} catch (error) {
 		console.error('Error processing POST request:', error);
 		return json({ error: `Error processing request: ${error.message}` }, { status: 400 });
