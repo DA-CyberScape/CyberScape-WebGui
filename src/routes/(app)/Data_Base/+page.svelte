@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import './styles.css';
 	import { goto } from '$app/navigation';
-	import { redirect } from '@sveltejs/kit';
+	import './styles.css';
 
 	interface Cluster {
 		listname: string;
