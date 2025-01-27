@@ -11,7 +11,7 @@ const config = {
 			base: ''
 		},
 		csrf: {
-			checkOrigin: true // Lassen Sie dies auf true für Sicherheit
+			checkOrigin: false
 		},
 		prerender: {
 			handleHttpError: (error) => {
