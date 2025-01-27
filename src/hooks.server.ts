@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { db } from '$lib/db';
 
 const handle: Handle = async ({ event, resolve }) => {
+	console.log('Started Auth Hook');
 	const authCookie = event.cookies.get('AuthorizationToken');
 
 	if (authCookie) {
