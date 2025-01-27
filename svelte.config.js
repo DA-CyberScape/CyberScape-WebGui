@@ -8,17 +8,17 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		paths: {
-			// Set the base path if your app is served at a subdirectory
 			base: ''
+		},
+		csrf: {
+			checkOrigin: true // Lassen Sie dies auf true für Sicherheit
 		},
 		prerender: {
 			handleHttpError: (error) => {
 				if (error.status === 401) {
-					// Log and handle 401 error
 					console.log('Handled 401 error during build');
-					return { status: 200, body: 'Unauthorized' }; // Return a fallback response
+					return { status: 200, body: 'Unauthorized' };
 				}
-				// Re-throw the error for other status codes
 				throw error;
 			}
 		}

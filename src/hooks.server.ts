@@ -1,21 +1,32 @@
 import type { Handle } from '@sveltejs/kit';
 import { JWT_ACCESS_SECRET } from '$env/static/private';
 import jwt from 'jsonwebtoken';
-
 import { db } from '$lib/db';
 
 const handle: Handle = async ({ event, resolve }) => {
 	console.log('Started Auth Hook');
+
+	// CORS handling
+	if (event.request.method === 'OPTIONS') {
+		return new Response(null, {
+			headers: {
+				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+				'Access-Control-Allow-Origin': '*', // Adjust this in production
+				'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+			}
+		});
+	}
+
 	const authCookie = event.cookies.get('AuthorizationToken');
 
 	if (authCookie) {
 		// Remove Bearer prefix
 		const token = authCookie.split(' ')[1];
-		console.log('Extracted Token:', token); // Check if this is working
+		console.log('Extracted Token:', token);
 
 		try {
 			const jwtUser = jwt.verify(token, JWT_ACCESS_SECRET);
-			console.log('JWT User:', jwtUser); // Log the decoded JWT payload
+			console.log('JWT User:', jwtUser);
 			if (typeof jwtUser === 'string') {
 				throw new Error('Something went wrong');
 			}
@@ -42,7 +53,14 @@ const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	console.log('Finished Auth Hook');
-	return await resolve(event);
+
+	const response = await resolve(event);
+
+	response.headers.append('Access-Control-Allow-Origin', '*'); // Adjust this in production
+	response.headers.append('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+	response.headers.append('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+	return response;
 };
 
 export { handle };
