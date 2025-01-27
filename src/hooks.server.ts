@@ -41,6 +41,7 @@ const handle: Handle = async ({ event, resolve }) => {
 		}
 	}
 
+	console.log('Finished Auth Hook');
 	return await resolve(event);
 };
 
