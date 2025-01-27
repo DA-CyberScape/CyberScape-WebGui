@@ -6,21 +6,9 @@ import { db } from '$lib/db';
 const handle: Handle = async ({ event, resolve }) => {
 	console.log('Started Auth Hook');
 
-	// CORS handling
-	if (event.request.method === 'OPTIONS') {
-		return new Response(null, {
-			headers: {
-				'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-				'Access-Control-Allow-Origin': '*', // Adjust this in production
-				'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-			}
-		});
-	}
-
 	const authCookie = event.cookies.get('AuthorizationToken');
 
 	if (authCookie) {
-		// Remove Bearer prefix
 		const token = authCookie.split(' ')[1];
 		console.log('Extracted Token:', token);
 
@@ -51,16 +39,13 @@ const handle: Handle = async ({ event, resolve }) => {
 			console.error(error);
 		}
 	}
+	else {
+		console.log('No Auth Token found');
+	}
 
 	console.log('Finished Auth Hook');
 
-	const response = await resolve(event);
-
-	response.headers.append('Access-Control-Allow-Origin', '*'); // Adjust this in production
-	response.headers.append('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-	response.headers.append('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-	return response;
+	return await resolve(event);
 };
 
 export { handle };

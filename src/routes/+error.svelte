@@ -7,10 +7,6 @@
 		if ($page.status === 401) {
 			window.location.href = '/login';
 		}
-
-		if ($page.status === 404) {
-			window.location.href = '/login';
-		}
 	});
 </script>
 
