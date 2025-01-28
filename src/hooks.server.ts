@@ -4,13 +4,10 @@ import jwt from 'jsonwebtoken';
 import { db } from '$lib/db';
 
 const handle: Handle = async ({ event, resolve }) => {
-	console.log('Started Auth Hook');
-
 	const authCookie = event.cookies.get('AuthorizationToken');
 
 	if (authCookie) {
 		const token = authCookie.split(' ')[1];
-		console.log('Extracted Token:', token);
 
 		try {
 			const jwtUser = jwt.verify(token, JWT_ACCESS_SECRET);
@@ -39,11 +36,6 @@ const handle: Handle = async ({ event, resolve }) => {
 			console.error(error);
 		}
 	}
-	else {
-		console.log('No Auth Token found');
-	}
-
-	console.log('Finished Auth Hook');
 
 	return await resolve(event);
 };
