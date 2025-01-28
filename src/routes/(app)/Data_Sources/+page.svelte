@@ -46,7 +46,7 @@
 
 <title>Data Sources</title>
 
-<section>
+<section id="data-sources">
 	<h1>Data Sources</h1>
 	{#if dataSources && dataStructure}
 		{#each dataSources as sourceItem}
