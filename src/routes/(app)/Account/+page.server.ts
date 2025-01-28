@@ -83,6 +83,7 @@ export const actions: Actions = {
 		cookies.delete('AuthorizationToken', { path: '/' });
 
 		console.log('Cookie deleted');
+		console.log('AuthorizationToken Cookie:', cookies.get('AuthorizationToken') || 'Not found');
 		throw redirect(302, '/login');
 	}
 };
