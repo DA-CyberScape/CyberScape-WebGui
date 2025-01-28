@@ -116,7 +116,7 @@
 	<title>Hosts</title>
 </svelte:head>
 
-<section>
+<section id="hosts-management">
 	<h1>Hosts</h1>
 
 	{#if hosts.length === 0}

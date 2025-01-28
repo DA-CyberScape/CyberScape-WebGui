@@ -1,13 +1,13 @@
 @import "../../colors.css";
 
-h1 {
+#hosts-management h1 {
     color: var(--text);
     margin-left: 30px;
     font-weight: bold;
     font-size: 30px;
 }
 
-table {
+#hosts-management table {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
@@ -15,7 +15,7 @@ table {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-th {
+#hosts-management th {
     background-color: var(--accent);
     border: 1px solid #a3a3a3;
     color: var(--text);
@@ -23,46 +23,45 @@ th {
     text-align: left;
 }
 
-td {
+#hosts-management td {
     padding: 10px 20px;
     border: 1px solid #a3a3a3;
-    position: relative; /* Ensure the input aligns correctly */
+    position: relative;
 }
 
-tbody tr {
+#hosts-management tbody tr {
     background: #fff;
 }
 
-tbody tr:hover {
+#hosts-management tbody tr:hover {
     background-color: #e2e2e2;
 }
 
-td:empty {
+#hosts-management td:empty {
     color: #ccc;
 }
 
-/* Input field styling */
-td input {
+#hosts-management td input {
     width: 100%;
     border: none;
-    border-bottom: 1px solid #a3a3a3; /* Display only the bottom border */
-    background: transparent; /* Match the background with the table cell */
-    padding: 5px 0; /* Ensure padding is minimal */
-    font-family: inherit; /* Match the font with the table */
-    font-size: inherit; /* Match the font size */
-    color: black; /* Use the text color from your color variables */
-    outline: none; /* Remove the outline on focus */
+    border-bottom: 1px solid #a3a3a3;
+    background: transparent;
+    padding: 5px 0;
+    font-family: inherit;
+    font-size: inherit;
+    color: black;
+    outline: none;
 }
 
-td input:focus {
-    border-bottom: 2px solid var(--accent); /* Highlight the bottom border on focus */
+#hosts-management td input:focus {
+    border-bottom: 2px solid var(--accent);
 }
 
-.input-error {
+#hosts-management .input-error {
     border-bottom: 2px solid red !important;
 }
 
-.error {
+#hosts-management .error {
     color: red;
     font-size: 0.9em;
     margin-top: 4px;
