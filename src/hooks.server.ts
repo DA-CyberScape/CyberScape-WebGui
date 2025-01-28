@@ -11,7 +11,6 @@ const handle: Handle = async ({ event, resolve }) => {
 
 		try {
 			const jwtUser = jwt.verify(token, JWT_ACCESS_SECRET);
-			console.log('JWT User:', jwtUser);
 			if (typeof jwtUser === 'string') {
 				throw new Error('Something went wrong');
 			}
