@@ -17,6 +17,13 @@ html, body {
     position: relative;
 }
 
+h1 {
+    color: var(--text);
+    margin-left: 30px;
+    font-weight: bold;
+    font-size: 30px;
+}
+
 #sidenav {
     height: 100%;
     width: 260px;
@@ -110,39 +117,26 @@ html, body {
     flex-wrap: wrap;
 }
 
-.powerOptions, .dataSources, .IPSettings {
+.FloatingBox {
     background-color: var(--secondary);
     padding: 10px;
     border-radius: 15px;
     flex: 1 1 calc(33% - 20px);
-    min-width: 300px;
+    min-width: 450px;
+    max-width: 500px;
     width: 100%;
     box-sizing: border-box;
     height: auto;
     display: flex;
     flex-direction: column;
     margin: 20px;
+    cursor: pointer;
 }
 
-.powerOptions {
-    max-width: 350px;
-}
-
-.dataSources {
-    max-width: 350px;
-}
-
-.IPSettings {
+.FloatingBox {
     max-width: 400px;
 }
 
-.boxHeader {
-    color: var(--text);
-    font-weight: bold;
-    font-size: 24px;
-    margin-left: 20px;
-    margin-top: 10px;
-}
 
 .boxItem {
     display: flex;
@@ -166,78 +160,15 @@ html, body {
     cursor: pointer;
 }
 
-.boxButton i.material-icons {
-    vertical-align: middle;
-    margin-right: 20px;
-}
-
-.powerOnButton i {
-    color: #29e429;
-}
-
-.powerOffButton i {
-    color: #ff4141;
-}
-
-.restartButton i {
-    color: #ffa400;
-}
-
-.editSourceButton {
-    background-color: white;
-    border: none;
-    color: black;
-    font-size: 16px;
-    padding: 8px 15px;
-    border-radius: 15px;
-    width: 100px;
-    height: 30px;
-    cursor: pointer;
-    margin-right: 20px;
-}
-
-.editSourceButton .material-icons {
-    font-size: 14pt;
-    vertical-align: middle;
-    margin-left: 10px;
-}
-
-.ipInput, .netmaskInput {
-    border: none;
-    font-size: 14px;
-    padding: 8px 15px;
-    border-radius: 15px;
-    height: 17px;
-    text-align: center;
-    outline: none;
-    resize: none;
-    overflow: hidden;
-}
-
-.ipInput {
-    width: 120px;
-    margin-right: 40px;
-}
-
-.netmaskInput {
-    width: 40px;
-    margin-right: 120px;
-}
-
-.ipInput:disabled, .netmaskInput:disabled {
-    background-color: #c5c2c2;
-    color: #000;
-}
-
 textarea.invalid {
     border: solid 2px red;
 }
 
-.IPSettings .customRadioButton {
+.FloatingBox .customRadioButton {
     display: none;
 }
 
-.IPSettings .customRadio {
+.FloatingBox .customRadio {
     display: inline-block;
     width: 20px;
     height: 20px;
@@ -249,7 +180,7 @@ textarea.invalid {
     margin-right: 40px;
 }
 
-.IPSettings .customRadio::after {
+.FloatingBox .customRadio::after {
     content: "X";
     font-size: 16pt;
     color: var(--accent);
@@ -260,12 +191,12 @@ textarea.invalid {
     transition: all 0.3s ease;
 }
 
-.IPSettings .customRadioButton:checked + .customRadio::after {
+.FloatingBox .customRadioButton:checked + .customRadio::after {
     border-color: var(--text);
     opacity: 1;
 }
 
-.IPSettings .customRadioLabel {
+.FloatingBox .customRadioLabel {
     display: flex;
     align-items: center;
     color: var(--text);
@@ -273,53 +204,6 @@ textarea.invalid {
     margin-top: 10px;
     margin-bottom: 15px;
     cursor: pointer;
-}
-
-.updateIPButton {
-    background-color: var(--accent);
-    border: none;
-    color: black;
-    font-size: 16px;
-    padding: 8px 15px;
-    border-radius: 15px;
-    width: 100px;
-    height: 30px;
-    cursor: pointer;
-    margin-right: 20px;
-}
-
-.updateIPButton:disabled {
-    background-color: var(--accent);
-    border: none;
-    color: gray;
-    font-size: 16px;
-    padding: 8px 15px;
-    border-radius: 15px;
-    width: 100px;
-    height: 30px;
-    cursor: pointer;
-    margin-right: 20px;
-}
-
-.dropbtn {
-    display: inline-block;
-    background-color: var(--accent);
-    color: var(--primary);
-    padding: 10px 20px;
-    font-size: 16px;
-    text-decoration: none;
-    position: relative;
-    overflow: hidden;
-    transition: 0.5s;
-    letter-spacing: 2px;
-    border-radius: 5px;
-    border: transparent;
-    margin-bottom: 0;
-}
-
-.dropbtn:hover:focus {
-    background-color: #a67912;
-    color: var(--primary);
 }
 
 #myInput {
@@ -336,39 +220,29 @@ textarea.invalid {
     outline: 3px solid #ddd;
 }
 
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f6f6f6;
-    min-width: 230px;
-    max-height: 500px;
-    overflow: auto;
-    border: 1px solid #ddd;
-    z-index: 1;
-}
-
-.dropdown-item {
-    display: block;
-    width: 100%;
-    background-color: white;
-    color: black;
-    padding: 12px 16px;
-    text-align: left;
-    border: none;
-    border-bottom: 1px solid #ddd;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.dropdown-item:hover {
-    background-color: #ddd;
-}
-
 .show {
     display: block;
+}
+
+#home .boxItem p {
+    color: var(--accent);
+    font-size: 16px;
+    margin-left: 20px;
+    margin-right: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#home .boxHeader {
+    color: var(--text);
+    font-weight: bold;
+    font-size: 24px;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.floating-box-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Adjust this value to set space between boxes */
 }
