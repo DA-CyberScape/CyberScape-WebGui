@@ -1,8 +1,6 @@
-#db-settings-editor {
-    @import '../../../../../node_modules/@fontsource/fira-mono';
-    @import "../../../colors.css";
-    @import "../../../popup.css";
-}
+@import '../../../../../node_modules/@fontsource/fira-mono';
+@import "../../../colors.css";
+@import "../../../popup.css";
 
 #db-settings-editor h1 {
     margin-bottom: 20px;
