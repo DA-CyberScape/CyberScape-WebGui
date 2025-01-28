@@ -9,7 +9,7 @@ export const load: PageServerLoad = (event: any) => {
 
 	if (user) {
 		console.log('User found in session. Redirecting to home page.');
-		throw redirect(302, '/?reload=true');
+		throw redirect(302, '/home?reload=true');
 	}
 };
 

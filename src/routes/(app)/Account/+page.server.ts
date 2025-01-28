@@ -81,7 +81,7 @@ export const actions: Actions = {
 	logout: async ({ cookies }) => {
 		console.log('Logout action triggered');
 		cookies.delete('AuthorizationToken', { path: '/' });
-		
+
 		console.log('Cookie deleted');
 		throw redirect(302, '/login');
 	}
