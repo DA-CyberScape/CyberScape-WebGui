@@ -36,7 +36,7 @@
 
 <div class="nav-container">
 	<nav id="sidenav" class="sidenav">
-		<a data-sveltekit-preload-data="off" href="/" class="nav-link">Home<i class="material-icons">home</i></a>
+		<a data-sveltekit-preload-data="off" href="/home" class="nav-link">Home<i class="material-icons">home</i></a>
 		<a data-sveltekit-preload-data="off" href="/Data_Sources" class="nav-link">Data Sources<i class="material-icons">list</i></a>
 		<a data-sveltekit-preload-data="off" href="/Data_Base" class="nav-link">Data Base<i
 			class="material-icons">settings</i></a>

@@ -1,6 +1,6 @@
 <script>
 	import Nav_Bar from '$lib/Nav_Bar.svelte';
-	import './styles.css';
+	import './home/styles.css';
 </script>
 
 <header>

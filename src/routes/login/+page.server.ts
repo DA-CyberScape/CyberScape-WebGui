@@ -49,6 +49,6 @@ export const actions: Actions = {
 		console.log('Set-Cookie Header:', event.cookies.getAll());
 
 		console.log('Redirecting to homepage with reload=true.');
-		throw redirect(302, '/?reload=true');
+		throw redirect(302, '/home?reload=true');
 	}
 };

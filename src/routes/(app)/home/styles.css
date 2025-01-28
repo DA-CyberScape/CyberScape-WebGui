@@ -1,6 +1,6 @@
-@import '../../../node_modules/@fontsource/fira-mono';
-@import "../colors.css";
-@import "../popup.css";
+@import '../../../../node_modules/@fontsource/fira-mono';
+@import "../../colors.css";
+@import "../../popup.css";
 
 html, body {
     font-family: 'Fira Mono', monospace;
