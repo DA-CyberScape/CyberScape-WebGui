@@ -149,7 +149,7 @@ async function updateData() {
 
 <title>Edit Database Cluster</title>
 
-<section>
+<section id="db-settings-editor">
 	<div class="container">
 		<h1>Edit Database Cluster</h1>
 

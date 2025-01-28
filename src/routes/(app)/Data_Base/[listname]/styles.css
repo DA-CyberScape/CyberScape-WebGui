@@ -1,30 +1,32 @@
-@import '../../../../../node_modules/@fontsource/fira-mono';
-@import "../../../colors.css";
-@import "../../../popup.css";
+#db-settings-editor {
+    @import '../../../../../node_modules/@fontsource/fira-mono';
+    @import "../../../colors.css";
+    @import "../../../popup.css";
+}
 
-h1 {
+#db-settings-editor h1 {
     margin-bottom: 20px;
     font-size: 2rem;
     color: var(--text);
-    text-align: left; /* Align header to the left */
+    text-align: left;
 }
 
-.container {
+#db-settings-editor .container {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Align everything to the left */
+    align-items: flex-start;
     gap: 20px;
-    max-width: 100%; /* Allow the container to stretch fully across the page */
-    margin-left: 20px; /* Optional, to give some padding on the left side */
-    padding-top: 20px; /* Top padding for better spacing */
+    max-width: 100%;
+    margin-left: 20px;
+    padding-top: 20px;
 }
 
-form {
+#db-settings-editor form {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    width: 100%; /* Make the form take up the full width available */
-    max-width: 600px; /* Set a max-width for form, if needed */
+    width: 100%;
+    max-width: 600px;
     background: var(--background);
     padding: 30px;
     border-radius: 10px;
@@ -32,20 +34,25 @@ form {
     margin: 0;
 }
 
-.form-group {
+#db-settings-editor .form-group {
     display: flex;
     flex-direction: column;
     margin: 0;
+    position: relative;
+    margin-bottom: 15px;
 }
 
-label {
+#db-settings-editor label {
     font-size: 1.2rem;
     margin: 0;
     color: var(--text);
     padding-right: 10px;
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
-input[type="text"] {
+#db-settings-editor input[type="text"] {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -56,12 +63,12 @@ input[type="text"] {
     transition: border-color 0.3s ease;
 }
 
-input[type="text"]:focus {
+#db-settings-editor input[type="text"]:focus {
     border: 2px solid var(--accent);
     outline: none;
 }
 
-input[type="checkbox"] {
+#db-settings-editor input[type="checkbox"] {
     appearance: none;
     width: 20px;
     max-width: 20px;
@@ -72,14 +79,15 @@ input[type="checkbox"] {
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     position: relative;
+    margin-right: 10px;
 }
 
-input[type="checkbox"]:checked {
+#db-settings-editor input[type="checkbox"]:checked {
     background-color: var(--accent);
     border-color: var(--accent);
 }
 
-input[type="checkbox"]:checked::after {
+#db-settings-editor input[type="checkbox"]:checked::after {
     content: '';
     position: absolute;
     left: 4px;
@@ -90,32 +98,27 @@ input[type="checkbox"]:checked::after {
     transform: rotate(45deg);
 }
 
-input[type="checkbox"]:hover {
+#db-settings-editor input[type="checkbox"]:hover {
     box-shadow: 0 0 5px var(--accent);
 }
 
-input[type="checkbox"] {
-    width: auto;
-    margin-right: 10px; /* Space between checkbox and label */
-}
-
-ul {
+#db-settings-editor ul {
     padding-left: 0;
     margin-top: 10px;
 }
 
-li {
+#db-settings-editor li {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
 }
 
-li input[type="text"] {
+#db-settings-editor li input[type="text"] {
     flex: 1;
 }
 
-.submit-button {
+#db-settings-editor .submit-button {
     padding: 12px 25px;
     border: none;
     border-radius: 5px;
@@ -124,76 +127,64 @@ li input[type="text"] {
     font-size: 1.1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    align-self: flex-start; /* Align button to the left */
+    align-self: flex-start;
     width: 150px;
 }
 
-.submit-button:hover {
+#db-settings-editor .submit-button:hover {
     background-color: #cc8f11;
 }
 
-.error-message {
+#db-settings-editor .error-message {
     color: red;
-    font-size: 1rem;
-    text-align: left; /* Align error message to the left */
+    font-size: 0.9rem;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+#db-settings-editor input.invalid {
+    border: 2px solid red;
+    background-color: #fdd;
 }
 
 @media (max-width: 768px) {
-    .container {
-        padding-left: 10px; /* Add some left padding for small screens */
+    #db-settings-editor .container {
+        padding-left: 10px;
     }
 
-    form {
+    #db-settings-editor form {
         width: 100%;
         padding: 20px;
         margin: 0;
     }
 
-    label, input[type="text"], input[type="checkbox"], button {
+    #db-settings-editor label,
+    #db-settings-editor input[type="text"],
+    #db-settings-editor input[type="checkbox"],
+    #db-settings-editor button {
         font-size: 1rem;
     }
 
-    li {
+    #db-settings-editor li {
         flex-direction: column;
         align-items: flex-start;
     }
 
-    .submit-button {
+    #db-settings-editor .submit-button {
         width: 100%;
         margin-top: 10px;
     }
 }
 
 @media (max-width: 480px) {
-    h1 {
+    #db-settings-editor h1 {
         font-size: 1.5rem;
     }
 
-    label, input[type="text"], button {
+    #db-settings-editor label,
+    #db-settings-editor input[type="text"],
+    #db-settings-editor button {
         font-size: 0.85rem;
     }
-}
-
-input.invalid {
-    border: 2px solid red;
-    background-color: #fdd;
-}
-
-/* Error message styling */
-.error-message {
-    color: red;
-    font-size: 0.9rem;
-    margin-top: 5px;
-    margin-bottom: 10px;
-}
-
-.form-group {
-    position: relative;
-    margin-bottom: 15px; /* Space between form groups */
-}
-
-.form-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
 }
