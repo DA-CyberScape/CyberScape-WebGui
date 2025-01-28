@@ -78,12 +78,11 @@ export const actions: Actions = {
 		return { success: 'Your password has been updated successfully.' };
 	},
 
-	// Action to handle logging out
-	logout: async (event) => {
-		// Delete the AuthorizationToken cookie to log the user out
-		event.cookies.delete('AuthorizationToken', { path: '/' });
-
-		// Redirect the user to the login page
+	logout: async ({ cookies }) => {
+		console.log('Logout action triggered');
+		cookies.delete('AuthorizationToken', { path: '/' });
+		
+		console.log('Cookie deleted');
 		throw redirect(302, '/login');
 	}
 };

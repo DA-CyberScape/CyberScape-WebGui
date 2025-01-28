@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import './styles.css';
+	import { page } from '$app/stores';
 
 	interface Cluster {
 		listname: string;
@@ -142,6 +143,16 @@
 	function openClusterEditPage(clusterName: string) {
 		goto(`/Data_Base/${encodeURIComponent(clusterName)}`);
 	}
+
+	onMount(() => {
+		const unsubscribe = page.subscribe(($page) => {
+			if ($page.url.searchParams.get('reload') === 'true') {
+				window.history.replaceState({}, '', '/home');
+				window.location.reload();
+			}
+		});
+		unsubscribe();
+	});
 </script>
 
 <style>

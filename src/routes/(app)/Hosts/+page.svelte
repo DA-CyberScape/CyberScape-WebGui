@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import './styles.css';
+	import { page } from '$app/stores';
 
 	let hosts = [];
 	let newHostname = '';
@@ -99,6 +100,16 @@
 
 	// Fetch hosts when the component mounts
 	onMount(getHosts);
+
+	onMount(() => {
+		const unsubscribe = page.subscribe(($page) => {
+			if ($page.url.searchParams.get('reload') === 'true') {
+				window.history.replaceState({}, '', '/home');
+				window.location.reload();
+			}
+		});
+		unsubscribe();
+	});
 </script>
 
 <svelte:head>

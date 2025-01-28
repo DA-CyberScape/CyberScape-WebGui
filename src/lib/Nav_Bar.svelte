@@ -36,12 +36,13 @@
 
 <div class="nav-container">
 	<nav id="sidenav" class="sidenav">
-		<a data-sveltekit-preload-data="off" href="/home" class="nav-link">Home<i class="material-icons">home</i></a>
-		<a data-sveltekit-preload-data="off" href="/Data_Sources" class="nav-link">Data Sources<i class="material-icons">list</i></a>
+		<a data-sveltekit-preload-data="off" href="/home" class="nav-link">Home<i
+			class="material-icons">home</i></a>
+		<a data-sveltekit-preload-data="off" href="/Data_Sources" class="nav-link">Data Sources<i
+			class="material-icons">list</i></a>
 		<a data-sveltekit-preload-data="off" href="/Data_Base" class="nav-link">Data Base<i
 			class="material-icons">settings</i></a>
-		<a data-sveltekit-preload-data="off" href="/Hosts" class="nav-link">Hosts<i
-			class="material-icons">computer</i></a>
+		<a data-sveltekit-preload-data="off" href="/Hosts" class="nav-link">Hosts<i class="material-icons">computer</i></a>
 		<a data-sveltekit-preload-data="off" href="/Account" class="nav-link">Account<i class="material-icons">account_circle</i></a>
 	</nav>
 </div>

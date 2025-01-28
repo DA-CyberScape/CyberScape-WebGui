@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import './styles.css';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 
 	export let data: PageData;
 
@@ -30,6 +32,16 @@
 	function stopClickPropagation(event: MouseEvent) {
 		event.stopPropagation();
 	}
+
+	onMount(() => {
+		const unsubscribe = page.subscribe(($page) => {
+			if ($page.url.searchParams.get('reload') === 'true') {
+				window.history.replaceState({}, '', '/home');
+				window.location.reload();
+			}
+		});
+		unsubscribe();
+	});
 </script>
 
 <style>
@@ -84,11 +96,12 @@
 				<h2>Change your username</h2>
 				<form method="POST" action="?/updateUsername">
 					<div class="user-box">
-						<input type="text" name="username" id="username" autocomplete="username" required >
+						<input type="text" name="username" id="username" autocomplete="username" required>
 						<label for="username">New Username</label>
 					</div>
 
-					<button type="button" class="submit" style="background-color: red; color: white" on:click={closeUsernamePopup}>Abort
+					<button type="button" class="submit" style="background-color: red; color: white"
+									on:click={closeUsernamePopup}>Abort
 					</button>
 					<input type="submit" class="submit" style="background-color: green; color: white" value="Update Username">
 				</form>
@@ -121,7 +134,9 @@
 						<label for="ConfirmPassword">Confirm New Password</label>
 					</div>
 
-					<button type="button" class="submit" style="background-color: red; color: white" on:click={closePasswdPopup}>Abort</button>
+					<button type="button" class="submit" style="background-color: red; color: white" on:click={closePasswdPopup}>
+						Abort
+					</button>
 					<input type="submit" class="submit" style="background-color: green; color: white" value="Update Password">
 				</form>
 			</div>
