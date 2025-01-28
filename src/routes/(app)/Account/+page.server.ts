@@ -80,7 +80,12 @@ export const actions: Actions = {
 
 	logout: async ({ cookies }) => {
 		console.log('Logout action triggered');
-		cookies.delete('AuthorizationToken', { path: '/' });
+		cookies.delete('AuthorizationToken', {
+			httpOnly: true,
+			path: '/',
+			sameSite: 'lax',
+			secure: false
+		});
 
 		console.log('Cookie deleted');
 		console.log('AuthorizationToken Cookie:', cookies.get('AuthorizationToken') || 'Not found');
