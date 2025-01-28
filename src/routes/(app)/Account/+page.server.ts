@@ -6,38 +6,36 @@ import type { Actions } from './$types';
 const db = new PrismaClient();
 
 export const actions: Actions = {
-	// Action to handle username update
-	updateUsername: async (event) => {
-		const { user } = event.locals;
+	updateUsername: async ({ request, locals }) => {
+		const { user } = locals;
 
-		// Ensure the user is logged in
 		if (!user) {
 			return fail(400, { error: 'You must be logged in to update your username.' });
 		}
 
-		const formData = await event.request.formData();
+		const formData = await request.formData();
 		const newUsername = formData.get('username')?.toString();
 
-		// Validate the new username
 		if (!newUsername || newUsername.trim().length === 0) {
 			return fail(400, { error: 'New username cannot be empty.' });
 		}
 
-		// Check if the username is already taken
 		const existingUser = await db.user.findUnique({ where: { username: newUsername } });
 		if (existingUser) {
 			return fail(400, { error: 'Username is already taken.' });
 		}
 
-		// Update the username in the database
 		await db.user.update({
 			where: { id: user.id },
 			data: { username: newUsername }
 		});
 
-		throw redirect(302, '/Account');
+		return {
+			status: 302,
+			headers: { Location: '/Account' }
+		};
 	},
-	// Action to handle password update
+
 	updatePassword: async (event) => {
 		const { user } = event.locals;
 
@@ -79,7 +77,6 @@ export const actions: Actions = {
 	},
 
 	logout: async ({ cookies }) => {
-		console.log('Logout action triggered');
 		cookies.delete('AuthorizationToken', {
 			httpOnly: true,
 			path: '/',
@@ -87,8 +84,6 @@ export const actions: Actions = {
 			secure: false
 		});
 
-		console.log('Cookie deleted');
-		console.log('AuthorizationToken Cookie:', cookies.get('AuthorizationToken') || 'Not found');
 		throw redirect(302, '/login');
 	}
 };
