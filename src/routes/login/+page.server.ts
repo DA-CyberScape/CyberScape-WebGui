@@ -5,22 +5,16 @@ import { loginUser } from '$lib/user.model';
 export const load: PageServerLoad = (event: any) => {
 	const user = event.locals.user;
 
-	console.log('Load function: Checking user session...');
-
 	if (user) {
-		console.log('User found in session. Redirecting to home page.');
 		throw redirect(302, '/home?reload=true');
 	}
 };
 
 export const actions: Actions = {
 	default: async (event) => {
-		console.log('Login action started. Parsing form data...');
-
 		const formData = Object.fromEntries(await event.request.formData());
 
 		if (!formData.username || !formData.password) {
-			console.log('Missing username or password.');
 			return fail(400, {
 				error: 'Missing username or password'
 			});
@@ -38,7 +32,7 @@ export const actions: Actions = {
 			});
 		}
 
-		console.log('Login successful. Setting AuthorizationToken cookie.');
+		console.log('Login successful as:', username);
 		event.cookies.set('AuthorizationToken', `Bearer ${token}`, {
 			httpOnly: true,
 			path: '/',
@@ -48,7 +42,6 @@ export const actions: Actions = {
 		});
 		console.log('Set-Cookie Header:', event.cookies.getAll());
 
-		console.log('Redirecting to homepage with reload=true.');
 		throw redirect(302, '/home?reload=true');
 	}
 };

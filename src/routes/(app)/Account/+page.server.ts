@@ -6,34 +6,35 @@ import type { Actions } from './$types';
 const db = new PrismaClient();
 
 export const actions: Actions = {
-	updateUsername: async ({ request, locals }) => {
-		const { user } = locals;
+	updateUsername: async (event) => {
+		const { user } = event.locals;
 
+		// Ensure the user is logged in
 		if (!user) {
 			return fail(400, { error: 'You must be logged in to update your username.' });
 		}
 
-		const formData = await request.formData();
+		const formData = await event.request.formData();
 		const newUsername = formData.get('username')?.toString();
 
+		// Validate the new username
 		if (!newUsername || newUsername.trim().length === 0) {
 			return fail(400, { error: 'New username cannot be empty.' });
 		}
 
+		// Check if the username is already taken
 		const existingUser = await db.user.findUnique({ where: { username: newUsername } });
 		if (existingUser) {
 			return fail(400, { error: 'Username is already taken.' });
 		}
 
+		// Update the username in the database
 		await db.user.update({
 			where: { id: user.id },
 			data: { username: newUsername }
 		});
 
-		return {
-			status: 302,
-			headers: { Location: '/Account' }
-		};
+		throw redirect(302, '/Account');
 	},
 
 	updatePassword: async (event) => {
