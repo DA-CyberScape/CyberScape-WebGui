@@ -6,10 +6,12 @@
 
 	let dataSources: any = null;
 	let dataStructure: any = null;
+	let showPopup: boolean = false;
+	let selectedSourceId: string | null = null;
 
 	onMount(async () => {
 		try {
-			const sourcesResponse = await fetch('/api/sources');
+			const sourcesResponse = await fetch('http://10.0.1.10:5073/configurations/');
 			const structureResponse = await fetch('/api/dsstructure');
 
 			if (!sourcesResponse.ok) {
@@ -33,6 +35,53 @@
 		});
 	}
 
+	function openPopup(id: string) {
+		selectedSourceId = id;
+		showPopup = true;
+	}
+
+	function closePopup() {
+		showPopup = false;
+	}
+
+	async function deleteDataSource() {
+		if (!selectedSourceId) return;
+
+		try {
+			console.log('Selected ID to delete:', selectedSourceId);
+			console.log('Before deletion:', JSON.stringify(dataSources, null, 2));
+
+			const updatedDataSources = dataSources.map((source) => {
+				const key = Object.keys(source)[0];
+				return {
+					[key]: source[key].filter((ds) => ds.id !== selectedSourceId)
+				};
+			});
+
+			console.log('Posting updated sources:', JSON.stringify(updatedDataSources, null, 2));
+
+			// Send the full updated list
+			const response = await fetch('http://10.0.1.10:5073/configurations/', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(updatedDataSources)
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to delete data source');
+			}
+
+			// Force reactivity
+			dataSources = [...updatedDataSources];
+
+			console.log('Updated sources after deletion:', JSON.stringify(dataSources, null, 2));
+
+			closePopup();
+		} catch (error) {
+			console.error('Error deleting data source:', error);
+		}
+	}
+
 	onMount(() => {
 		const unsubscribe = page.subscribe(($page) => {
 			if ($page.url.searchParams.get('reload') === 'true') {
@@ -43,6 +92,21 @@
 		unsubscribe();
 	});
 </script>
+
+<style>
+    .popup-overlay {
+        position: fixed; /* Keeps the overlay fixed relative to the viewport */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: flex;
+        justify-content: center; /* Centers the popup horizontally */
+        align-items: center; /* Centers the popup vertically */
+        z-index: 1000;
+    }
+</style>
 
 <title>Data Sources</title>
 
@@ -120,6 +184,12 @@
 										{/if}
 									</td>
 								{/each}
+								<td id="delete-column">
+									<button class="delete-btn" style="cursor: pointer" title="Delete DatSource {item.name}"
+													on:click={(event) => { event.stopPropagation(); openPopup(item.id); }}>
+										<i class="material-icons">delete</i>
+									</button>
+								</td>
 							</tr>
 						{/each}
 						</tbody>
@@ -131,5 +201,21 @@
 		{/each}
 	{:else}
 		<p>Loading data sources...</p>
+	{/if}
+
+	{#if showPopup}
+		<div class="popup-overlay" on:click={closePopup}>
+			<div class="popup-box">
+				<button class="close" on:click={closePopup}>&times;</button>
+				<h2>Confirm Deletion</h2>
+				<p>Are you sure you want to delete this Data-Source?</p>
+
+				<button class="submit" style="background-color: green; color: white; cursor: pointer"
+								on:click={deleteDataSource}>Yes
+				</button>
+				<button class="submit" style="background-color: red; color: white; cursor: pointer" on:click={closePopup}>No
+				</button>
+			</div>
+		</div>
 	{/if}
 </section>

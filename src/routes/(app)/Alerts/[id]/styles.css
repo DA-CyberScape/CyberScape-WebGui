@@ -1,0 +1,130 @@
+@import '../../../../../node_modules/@fontsource/fira-mono';
+@import "../../../colors.css";
+
+/* General Styles */
+#edit-alert h1 {
+    color: var(--text);
+    margin-left: 30px;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+#edit-alert h3, #edit-alert h4 {
+    font-size: 1.3rem;
+    margin: 0 0 5px;
+    color: var(--text);
+}
+
+#edit-alert h4 {
+    font-size: 1rem;
+    color: var(--text-secondary); /* Slightly muted color for h4 */
+}
+
+#edit-alert form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px; /* Slightly increased space for better separation */
+    margin-bottom: 30px;
+    background: var(--background);
+    padding: 30px; /* Increased padding for more breathing space */
+    border-radius: 25px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+#edit-alert .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Increased gap for a more spacious look */
+    min-width: 300px;
+}
+
+#edit-alert label {
+    font-size: 1.3rem;
+    margin: 0;
+    color: var(--text);
+}
+
+#edit-alert input[type="text"],
+#edit-alert input[type="email"],
+#edit-alert select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+}
+
+#edit-alert input[type="text"]:focus,
+#edit-alert input[type="email"]:focus,
+#edit-alert select:focus {
+    border: 2px solid var(--accent);
+    outline: none;
+}
+
+#edit-alert button[type="submit"] {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--accent);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#edit-alert button[type="submit"]:hover {
+    background-color: #cc8f11;
+}
+
+/* Condition Section */
+#edit-alert #condition-section {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    background: grey;
+    padding: 20px;
+    border-radius: 25px;
+}
+
+#edit-alert .form-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+#edit-alert input[type="text"],
+#edit-alert select {
+    max-width: none; /* Allow inputs to be flexible and fit within row */
+    flex: 1 1 auto; /* Make sure inputs stretch within the row */
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    #edit-alert .form-group {
+        flex: 1 1 100%;
+    }
+
+    #edit-alert #condition-section {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    #edit-alert h1 {
+        font-size: 1.5rem;
+    }
+
+    #edit-alert label, #edit-alert input {
+        font-size: 0.85rem;
+    }
+
+    #edit-alert button[type="submit"] {
+        font-size: 1rem;
+    }
+}

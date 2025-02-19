@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import './styles.css';
 	import { goto } from '$app/navigation';
+	import yaml from 'js-yaml';
 
 	let dbSettings: any = null;
 	let error: string | null = null;
@@ -11,19 +12,35 @@
 	// State to track validation errors
 	let validationErrors: { [key: string]: string } = {};
 
-	// Async function to fetch data
+	// Name des Clusters aus der URL
+	let listname: string = '';
+	$: listname = $page.params.listname;
+
+	// Das aktuell bearbeitete Cluster
+	let clusterToEdit: any = null;
+	let editedListname: string = '';
+
 	async function fetchData() {
 		isLoading = true;
 		try {
-			const response = await fetch('/api/db');
+			const response = await fetch('http://10.0.1.10:5073/configurations/database/');
 			if (!response.ok) {
 				throw new Error(`Failed to fetch data: ${response.statusText}`);
 			}
-			dbSettings = await response.json();
+			const textData = await response.text();
+			dbSettings = yaml.load(textData);
 
-			// Ensure at least one empty IP field exists in the cluster to edit
-			if (clusterToEdit?.list && !clusterToEdit.list.some((ip: string) => ip.trim() === '')) {
-				clusterToEdit.list.push('');
+			if (dbSettings?.clusterlists) {
+				clusterToEdit = dbSettings.clusterlists.find((cluster: any) => cluster.listname === listname);
+
+				if (clusterToEdit) {
+					editedListname = clusterToEdit.listname;
+
+					// Sicherstellen, dass es immer ein leeres IP-Feld gibt
+					if (!clusterToEdit.list.some((ip: string) => ip.trim() === '')) {
+						clusterToEdit.list.push('');
+					}
+				}
 			}
 		} catch (err) {
 			error = err.message;
@@ -32,21 +49,19 @@
 		}
 	}
 
-	// Validate IP address
+	// IP-Adresse validieren
 	function validateIP(ip: string): boolean {
 		const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 		return regex.test(ip);
 	}
 
-	// Add an empty field if the last field is not empty
+	// Leeres Feld hinzufügen, falls nötig
 	function addEmptyFieldIfNeeded() {
 		if (clusterToEdit?.list) {
-			// Remove all empty fields except the last one
 			clusterToEdit.list = clusterToEdit.list.filter((ip: string, index: number) =>
 				ip.trim() !== '' || index === clusterToEdit.list.length - 1
 			);
 
-			// Add an empty field if the last field is not empty
 			const lastIP = clusterToEdit.list[clusterToEdit.list.length - 1];
 			if (lastIP.trim() !== '') {
 				clusterToEdit.list.push('');
@@ -54,93 +69,95 @@
 		}
 	}
 
-async function updateData() {
-    validationErrors = {}; // Reset validation errors
-    let ipTracker = new Set<string>(); // Track unique IPs
-    let hasDuplicates = false;
+	// Validierung für den neuen Cluster-Namen
+	function validateClusterName() {
+		// Überprüfen, ob der neue Clustername bereits existiert
+		const existingClusterNames = dbSettings?.clusterlists.map((cluster: any) => cluster.listname);
+		if (existingClusterNames?.includes(editedListname) && editedListname !== listname) {
+			validationErrors['listname'] = 'Cluster name already exists';
+			return false;
+		}
+		// Falls der Name verfügbar ist
+		delete validationErrors['listname'];
+		return true;
+	}
 
-    // Remove empty IP fields before submission
-    clusterToEdit.list = clusterToEdit.list.filter((ip: string) => ip.trim() !== '');
+	async function updateData() {
+		validationErrors = {};
+		let ipTracker = new Set<string>();
+		let hasDuplicates = false;
 
-    // Validate all IP addresses
-    for (let i = 0; i < clusterToEdit.list.length; i++) {
-        const ip = clusterToEdit.list[i].trim();
+		// Überprüfen, ob der neue Clustername gültig ist
+		if (!validateClusterName()) {
+			return; // Stoppt, wenn der Name bereits existiert
+		}
 
-        // Validate IP syntax
-        if (!validateIP(ip)) {
-            validationErrors[`ip-${i}`] = `Invalid IP address`;
-        }
+		// Entferne leere Felder vor der Validierung
+		clusterToEdit.list = clusterToEdit.list.filter((ip: string) => ip.trim() !== '');
 
-        // Check for duplicate IPs
-        if (ipTracker.has(ip)) {
-            validationErrors[`ip-${i}`] = `Duplicate IP address`;
-            hasDuplicates = true;
-        } else {
-            ipTracker.add(ip);
-        }
-    }
+		// Mindestens eine IP muss ausgefüllt sein
+		if (clusterToEdit.list.length === 0) {
+			validationErrors['ip'] = 'At least one valid IP address is required';
+		}
 
-    // If there are validation errors or duplicate IPs, stop and re-add the empty IP field
-    if (Object.keys(validationErrors).length > 0 || hasDuplicates) {
-        // Re-add an empty field for user to input IP
-        addEmptyFieldIfNeeded();
-        return;
-    }
-
-    // If the current cluster is marked as active, deactivate all others
-    if (clusterToEdit.active) {
-        dbSettings.clusterlists = dbSettings.clusterlists.map((cluster: any) => ({
-            ...cluster,
-            active: cluster === clusterToEdit // Only the current cluster remains active
-        }));
-    }
-
-    // Proceed with updating the data, using the cleaned list
-    try {
-        const response = await fetch('/api/db', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...dbSettings,
-                clusterlists: dbSettings.clusterlists.map((cluster: any) =>
-                    cluster === clusterToEdit
-                        ? { ...clusterToEdit, list: clusterToEdit.list }
-                        : cluster
-                )
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to update data: ${response.statusText}`);
-        }
-
-        alert('Cluster settings updated successfully!');
-				goto('/Data_Base');
-    } catch (err) {
-        error = err.message;
-        console.error('Error updating data:', err);
-    } finally {
-        // Ensure the empty field is re-added after submission if needed
-        addEmptyFieldIfNeeded();
-    }
-}
-
-	// Get the selected cluster name from the URL
-	let listname: string = '';
-	$: listname = $page.params.listname;
-
-	// Find the cluster being edited
-	let clusterToEdit: any = null;
-	$: {
-		if (dbSettings && dbSettings.clusterlists) {
-			clusterToEdit = dbSettings.clusterlists.find(
-				(cluster: any) => cluster.listname === listname
-			);
-
-			// Ensure there's at least one empty field
-			if (clusterToEdit?.list && !clusterToEdit.list.some((ip: string) => ip.trim() === '')) {
-				clusterToEdit.list.push('');
+		// IP-Adressen validieren
+		clusterToEdit.list.forEach((ip, index) => {
+			if (!validateIP(ip)) {
+				validationErrors[`ip-${index}`] = 'Invalid IP address';
 			}
+
+			if (ipTracker.has(ip)) {
+				validationErrors[`ip-${index}`] = 'Duplicate IP address';
+				hasDuplicates = true;
+			} else {
+				ipTracker.add(ip);
+			}
+		});
+
+		// Falls Fehler vorhanden sind, nicht fortfahren
+		if (Object.keys(validationErrors).length > 0 || hasDuplicates) {
+			addEmptyFieldIfNeeded();
+			return;
+		}
+
+		// Wenn der Cluster "Active" ist, deaktiviere alle anderen Cluster
+		if (clusterToEdit.active) {
+			dbSettings.clusterlists.forEach((cluster: any) => {
+				if (cluster.listname !== clusterToEdit.listname) {
+					cluster.active = false; // Deaktiviere andere Cluster
+				}
+			});
+		}
+
+		// Cluster-Name aktualisieren
+		clusterToEdit.listname = editedListname;
+
+		// Liste mit den aktualisierten Clustern speichern
+		dbSettings.clusterlists = dbSettings.clusterlists.map((cluster: any) =>
+			cluster.listname === listname ? { ...clusterToEdit } : cluster
+		);
+
+		// Daten als YAML speichern
+		const yamlData = yaml.dump(dbSettings, { indent: 2 });
+
+		try {
+			const response = await fetch('http://10.0.1.10:5073/configurations/database/', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-yaml' },
+				body: yamlData
+			});
+
+			if (!response.ok) {
+				throw new Error(`Failed to update data: ${response.statusText}`);
+			}
+
+			alert('Cluster settings updated successfully!');
+			goto('/Data_Base');
+		} catch (err) {
+			error = err.message;
+			console.error('Error updating data:', err);
+		} finally {
+			addEmptyFieldIfNeeded();
 		}
 	}
 
@@ -165,12 +182,11 @@ async function updateData() {
 					<input
 						type="text"
 						id="listname"
-						bind:value={clusterToEdit.listname}
+						bind:value={editedListname}
 						placeholder="Cluster Name"
 						class={validationErrors['listname'] ? 'invalid' : ''}
 					/>
 					{#if validationErrors['listname']}
-						<br>
 						<p class="error-message">{validationErrors['listname']}</p>
 					{/if}
 				</div>

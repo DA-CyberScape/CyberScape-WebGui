@@ -1,0 +1,188 @@
+@import '../../../../../node_modules/@fontsource/fira-mono';
+@import "../../../colors.css";
+@import "../../../popup.css";
+
+#db-settings-editor h1 {
+    margin-bottom: 20px;
+    font-size: 2rem;
+    color: var(--text);
+    text-align: left;
+}
+
+#db-settings-editor .container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    max-width: 100%;
+    margin-left: 20px;
+    padding-top: 20px;
+}
+
+#db-settings-editor form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 600px;
+    background: var(--background);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 0;
+}
+
+#db-settings-editor .form-group {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    position: relative;
+    margin-bottom: 15px;
+}
+
+#db-settings-editor label {
+    font-size: 1.2rem;
+    margin: 0;
+    color: var(--text);
+    padding-right: 10px;
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#db-settings-editor input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+}
+
+#db-settings-editor input[type="text"]:focus {
+    border: 2px solid var(--accent);
+    outline: none;
+}
+
+#db-settings-editor input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    max-width: 20px;
+    height: 20px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    margin-right: 10px;
+}
+
+#db-settings-editor input[type="checkbox"]:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+#db-settings-editor input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+#db-settings-editor input[type="checkbox"]:hover {
+    box-shadow: 0 0 5px var(--accent);
+}
+
+#db-settings-editor ul {
+    padding-left: 0;
+    margin-top: 10px;
+}
+
+#db-settings-editor li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#db-settings-editor li input[type="text"] {
+    flex: 1;
+}
+
+#db-settings-editor .submit-button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--accent);
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-self: flex-start;
+    width: 150px;
+}
+
+#db-settings-editor .submit-button:hover {
+    background-color: #cc8f11;
+}
+
+#db-settings-editor .error-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+#db-settings-editor input.invalid {
+    border: 2px solid red;
+    background-color: #fdd;
+}
+
+@media (max-width: 768px) {
+    #db-settings-editor .container {
+        padding-left: 10px;
+    }
+
+    #db-settings-editor form {
+        width: 100%;
+        padding: 20px;
+        margin: 0;
+    }
+
+    #db-settings-editor label,
+    #db-settings-editor input[type="text"],
+    #db-settings-editor input[type="checkbox"],
+    #db-settings-editor button {
+        font-size: 1rem;
+    }
+
+    #db-settings-editor li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #db-settings-editor .submit-button {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    #db-settings-editor h1 {
+        font-size: 1.5rem;
+    }
+
+    #db-settings-editor label,
+    #db-settings-editor input[type="text"],
+    #db-settings-editor button {
+        font-size: 0.85rem;
+    }
+}

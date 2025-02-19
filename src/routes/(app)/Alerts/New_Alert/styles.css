@@ -1,0 +1,130 @@
+@import '../../../../../node_modules/@fontsource/fira-mono';
+@import "../../../colors.css";
+
+/* General Styles */
+#create-alert h1 {
+    color: var(--text);
+    margin-left: 30px;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+#create-alert h3, #create-alert h4 {
+    font-size: 1.3rem;
+    margin: 0 0 5px;
+    color: var(--text);
+}
+
+#create-alert h4 {
+    font-size: 1rem;
+    color: var(--text-secondary); /* Slightly muted color for h4 */
+}
+
+#create-alert form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px; /* Slightly increased space for better separation */
+    margin-bottom: 30px;
+    background: var(--background);
+    padding: 30px; /* Increased padding for more breathing space */
+    border-radius: 25px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+#create-alert .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Increased gap for a more spacious look */
+    min-width: 300px;
+}
+
+#create-alert label {
+    font-size: 1.3rem;
+    margin: 0;
+    color: var(--text);
+}
+
+#create-alert input[type="text"],
+#create-alert input[type="email"],
+#create-alert select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+}
+
+#create-alert input[type="text"]:focus,
+#create-alert input[type="email"]:focus,
+#create-alert select:focus {
+    border: 2px solid var(--accent);
+    outline: none;
+}
+
+#create-alert button[type="submit"] {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--accent);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#create-alert button[type="submit"]:hover {
+    background-color: #cc8f11;
+}
+
+/* Condition Section */
+#create-alert #condition-section {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    background: grey;
+    padding: 20px;
+    border-radius: 25px;
+}
+
+#create-alert .form-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+#create-alert input[type="text"],
+#create-alert select {
+    max-width: none; /* Allow inputs to be flexible and fit within row */
+    flex: 1 1 auto; /* Make sure inputs stretch within the row */
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    #create-alert .form-group {
+        flex: 1 1 100%;
+    }
+
+    #create-alert #condition-section {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    #create-alert h1 {
+        font-size: 1.5rem;
+    }
+
+    #create-alert label, #create-alert input {
+        font-size: 0.85rem;
+    }
+
+    #create-alert button[type="submit"] {
+        font-size: 1rem;
+    }
+}

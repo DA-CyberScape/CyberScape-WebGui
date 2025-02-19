@@ -108,3 +108,26 @@
 #db-settings-table input[type="checkbox"]:hover {
     box-shadow: 0 0 5px var(--accent);
 }
+
+#db-settings-section .addClusterButton {
+    background-color: var(--accent);
+    border: none;
+    color: black;
+    font-size: 16px;
+    padding: 8px 15px;
+    border-radius: 15px;
+    width: 120px;
+    height: 30px;
+    cursor: pointer;
+    margin-right: 20px;
+    outline: none;
+}
+
+#db-settings-section .addClusterButton:hover {
+    background-color: #e18e0e;
+}
+
+#db-settings-section #delete-column {
+    width: 50px;
+    text-align: center;
+}

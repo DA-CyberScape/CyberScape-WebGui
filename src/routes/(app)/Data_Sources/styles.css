@@ -63,3 +63,8 @@
 #data-sources .addSourceButton:hover {
     background-color: #e18e0e;
 }
+
+#data-sources #delete-column {
+    width: 50px; /* Adjust width as needed */
+    text-align: center;
+}

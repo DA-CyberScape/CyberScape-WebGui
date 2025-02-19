@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import yaml from 'js-yaml';
 	import './styles.css';
 	import { page } from '$app/stores';
 
@@ -22,16 +23,19 @@
 	let showPopup = false;
 	let popupClusterIndex: number | null = null;
 	let tempActiveState: boolean[] = [];
+	let showdeletionPopup = false;
+	let clusterToDelete: string | null = null;
+
 
 	onMount(async () => {
 		try {
-			const response = await fetch('/api/db');
+			const response = await fetch('http://10.0.1.10:5073/configurations/database/');
 			if (!response.ok) {
 				throw new Error(`Failed to fetch data: ${response.statusText}`);
 			}
-			dbSettings = await response.json();
+			const textData = await response.text(); // Read response as text
+			dbSettings = yaml.load(textData); // Convert YAML to JSON
 
-			// Initialize temporary checkbox states
 			if (dbSettings) {
 				tempActiveState = dbSettings.clusterlists.map(cluster => cluster.active);
 			}
@@ -39,6 +43,7 @@
 			error = err instanceof Error ? err.message : 'Unknown error';
 		}
 	});
+
 
 	function openPopup(clusterIndex: number) {
 		showPopup = true;
@@ -69,16 +74,23 @@
 			}))
 		};
 
-		// Persist the change
+		// Convert updated `dbSettings` back to YAML with proper formatting
+		const yamlData = yaml.dump(dbSettings, { indent: 2 });
+
+
 		try {
-			const response = await fetch('/api/db', {
+			const response = await fetch('http://10.0.1.10:5073/configurations/database/', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(dbSettings)
+				headers: { 'Content-Type': 'application/x-yaml' },
+				body: yamlData
 			});
+
+			const responseText = await response.text(); // Read response as text
+
 			if (!response.ok) {
-				throw new Error(`Failed to update data: ${response.statusText}`);
+				throw new Error(`Failed to update data: ${response.statusText} - ${responseText}`);
 			}
+
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Unknown error';
 			console.error('Error updating data:', err);
@@ -89,6 +101,7 @@
 			popupClusterIndex = null;
 		}
 	}
+
 
 	async function handleCheckboxChange(clusterIndex: number, isActiveCheckbox: boolean) {
 		if (!dbSettings) return;
@@ -117,7 +130,7 @@
 				};
 
 				// Persist the change
-				const response = await fetch('/api/db', {
+				const response = await fetch('http://10.0.1.10:5073/configurations/database/', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(dbSettings)
@@ -142,6 +155,50 @@
 
 	function openClusterEditPage(clusterName: string) {
 		goto(`/Data_Base/${encodeURIComponent(clusterName)}`);
+	}
+
+	function opendeletionPopup(clusterName: string) {
+		showdeletionPopup = true;
+		clusterToDelete = clusterName;
+	}
+
+	function closedeletionPopup() {
+		showdeletionPopup = false;
+		clusterToDelete = null;
+	}
+
+	async function deleteCluster() {
+		if (!dbSettings || !clusterToDelete) return;
+
+		// Remove the selected cluster
+		dbSettings = {
+			...dbSettings,
+			clusterlists: dbSettings.clusterlists.filter(cluster => cluster.listname !== clusterToDelete)
+		};
+
+		// Convert updated `dbSettings` back to YAML
+		const yamlData = yaml.dump(dbSettings, { indent: 2 });
+
+		try {
+			const response = await fetch('http://10.0.1.10:5073/configurations/database/', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-yaml' },
+				body: yamlData
+			});
+
+			const responseText = await response.text();
+
+			if (!response.ok) {
+				throw new Error(`Failed to update data: ${response.statusText} - ${responseText}`);
+			}
+
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Unknown error';
+			console.error('Error updating data:', err);
+		} finally {
+			// Close popup
+			closedeletionPopup();
+		}
 	}
 
 	onMount(() => {
@@ -175,16 +232,23 @@
 <section id="db-settings-section">
 	<h1 id="db-settings-title">DB Settings</h1>
 
+
 	{#if error}
 		<p id="db-settings-error" style="color: red;">Error: {error}</p>
 	{:else if dbSettings}
-		<table id="db-settings-table" border="1">
+
+		<button class="addClusterButton" on:click={() => goto(`/Data_Base/New_Cluster`)}>
+			+ Add new
+		</button>
+
+		<table id="db-settings-table">
 			<thead>
 			<tr>
 				<th>Name</th>
 				<th>Active</th>
 				<th>Production</th>
 				<th>IP Addresses</th>
+				<th style="background: none; border: none; width: 50px"></th>
 			</tr>
 			</thead>
 			<tbody>
@@ -223,6 +287,19 @@
 							</tbody>
 						</table>
 					</td>
+					<td id="delete-column">
+						{#if cluster.active}
+							<button class="delete-btn" style="cursor: pointer" title="Delete Cluster {cluster.listname}" disabled
+											on:click={(event) => { event.stopPropagation(); opendeletionPopup(cluster.listname); }}>
+								<i class="material-icons">delete</i>
+							</button>
+						{:else}
+							<button class="delete-btn" style="cursor: pointer" title="Delete Cluster {cluster.listname}"
+											on:click={(event) => { event.stopPropagation(); opendeletionPopup(cluster.listname); }}>
+								<i class="material-icons">delete</i>
+							</button>
+						{/if}
+					</td>
 				</tr>
 			{/each}
 			</tbody>
@@ -238,8 +315,21 @@
 				<h2>Confirm Active Change</h2>
 				<p>Are you sure you want to change the active database?</p>
 
-				<button class="submit" style="background-color: green; color: white" on:click={confirmActiveChange}>Yes</button>
-				<button class="submit" style="background-color: red; color: white" on:click={closePopup}>No</button>
+				<button class="submit" style="background-color: green; color: white; cursor: pointer" on:click={confirmActiveChange}>Yes</button>
+				<button class="submit" style="background-color: red; color: white; cursor: pointer" on:click={closePopup}>No</button>
+			</div>
+		</div>
+	{/if}
+
+	{#if showdeletionPopup}
+		<div class="popup-overlay" on:click={closedeletionPopup}>
+			<div class="popup-box">
+				<button class="close" on:click={closedeletionPopup}>&times;</button>
+				<h2>Confirm Cluster Deletion</h2>
+				<p>Are you sure you want to delete this cluster?</p>
+
+				<button class="submit" style="background-color: green; color: white; cursor: pointer" on:click={deleteCluster}>Yes</button>
+				<button class="submit" style="background-color: red; color: white; cursor: pointer" on:click={closedeletionPopup}>No</button>
 			</div>
 		</div>
 	{/if}
