@@ -1,50 +1,30 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import './styles.css';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { invalidate } from '$app/navigation';
+	import './styles.css';
 
-	let alerts: any = [];
+	let alerts = $page.data.alerts;
 
-	onMount(async () => {
-		try {
-			const response = await fetch('http://10.0.1.10:5073/alerts/');
-			if (!response.ok) {
-				throw new Error(`Error fetching alerts: ${response.statusText}`);
-			}
-			const json = await response.json();
-			alerts = Array.isArray(json) ? json : [];
-		} catch (error) {
-			console.error('Error fetching alerts:', error);
-			alerts = [];
-		}
-	});
-
-	// Function to delete the alert
 	const deleteAlert = async (alertId: string, event: MouseEvent) => {
-		// Prevent row click when deleting
 		event.stopPropagation();
 
-		try {
-			const response = await fetch(`http://10.0.1.10:5073/alerts/${alertId}`, {
-				method: 'DELETE'
-			});
+		const formData = new FormData();
+		formData.append('alertId', alertId);
 
-			if (!response.ok) {
-				throw new Error(`Error deleting alert: ${response.statusText}`);
-			}
+		await fetch('/Alerts/delete', { // Ensure correct path
+			method: 'POST',
+			body: formData
+		});
 
-			alerts = alerts.filter((alert) => alert.id !== alertId);
-		} catch (error) {
-			console.error('Error deleting alert:', error);
-		}
+		await invalidate('alerts'); // Refresh alerts list
 	};
 
-	// Function to navigate to the alert details page
+
 	const navigateToAlert = (alertId: string) => {
 		goto(`/Alerts/${alertId}`);
 	};
 </script>
-
 
 <title>Alerts</title>
 
