@@ -56,20 +56,36 @@ export const load = async ({ params }) => {
 
 export const actions = {
 	fetchColumns: async ({ request }) => {
-		const { selectedTable } = await request.json();
+		let selectedTable;
+		const contentType = request.headers.get('content-type');
+
+		if (contentType && contentType.includes('application/json')) {
+			const body = await request.json();
+			selectedTable = body.selectedTable;
+		} else {
+			const formData = await request.formData();
+			selectedTable = formData.get('selectedTable');
+		}
 
 		if (!selectedTable) {
 			return json({ columns: [] });
 		}
+
 		try {
 			// Fetch the schema data
 			const schemaResponse = await fetch(`${API_BASE_URL}configurations/Database/schema/`);
 			if (!schemaResponse.ok) {
+				console.error(`Failed to fetch schema: ${schemaResponse.statusText}`);
 				throw error(schemaResponse.status, 'Failed to fetch schema');
 			}
 
 			const schema = await schemaResponse.json();
-			const database = schema.Production;
+			const database = schema.Production || schema.Testing; // Check both Production and Testing
+
+			if (!database) {
+				console.error('Database schema not found');
+				throw error(404, 'Database schema not found');
+			}
 
 			const columns: string[] = [];
 			const tableMap: Record<string, string> = {};
@@ -83,25 +99,46 @@ export const actions = {
 
 			// Get the selected table's original name
 			const selectedTableOriginal = tableMap[selectedTable.toLowerCase()];
-			if (database[selectedTableOriginal]) {
-				columns.push(
-					...database[selectedTableOriginal]
-						.flatMap((colSet: string) =>
-							colSet
-								.split(',')
-								.map((col) => col.trim().split(' ')[0].replace(/["`]/g, '').toLowerCase())
-						)
-						.filter((col: string) => col !== '')
-				);
+			if (!selectedTableOriginal) {
+				console.error(`Table not found: ${selectedTable}`);
+				throw error(404, 'Table not found');
 			}
 
-			// Return the columns of the selected table
+			const tableSchema = database[selectedTableOriginal];
+
+			if (!tableSchema) {
+				console.error(`Schema not found for table: ${selectedTable}`);
+				throw error(404, 'Schema not found for table');
+			}
+			if (Array.isArray(tableSchema)) {
+				const columnString = tableSchema[0]; // Get the first element which contains the column definitions
+				if (columnString) {
+					// Extract column names from the column definition string
+					const extractedColumns = columnString
+						.split(',')
+						.map((col: string) => col.trim().split(' ')[0].replace(/["`]/g, '').toLowerCase());
+					columns.push(...extractedColumns);
+				}
+			} else if (typeof tableSchema === 'string') {
+				// Handle Materialized Views (or other cases where the schema is a string)
+				// Extract column names from the CREATE MATERIALIZED VIEW statement (if needed)
+				// This is a simplified example; you might need a more robust parser
+				const selectClause = tableSchema.match(/SELECT\s+(.+?)\s+FROM/i);
+				if (selectClause && selectClause[1]) {
+					const extractedColumns = selectClause[1]
+						.split(',')
+						.map((col) => col.trim().split(' ')[0].replace(/["`]/g, '').toLowerCase());
+					columns.push(...extractedColumns);
+				}
+			}
+
 			return json({ columns });
 		} catch (err) {
 			console.error('Error fetching columns for table:', err);
 			throw error(500, 'Error fetching columns');
 		}
 	},
+
 	saveAlert: async ({ request, params }) => {
 		const alertId = Number(params.id);
 

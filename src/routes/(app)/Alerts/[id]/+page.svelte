@@ -34,9 +34,9 @@
 		const response = await fetch(`?/fetchColumns`, {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/x-www-form-urlencoded'
 			},
-			body: JSON.stringify({ selectedTable })
+			body: new URLSearchParams({ selectedTable })
 		});
 
 		if (response.ok) {
@@ -46,6 +46,7 @@
 			console.error('Failed to fetch columns');
 		}
 	}
+
 
 </script>
 

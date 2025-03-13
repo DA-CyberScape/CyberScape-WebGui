@@ -1,45 +1,36 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import './styles.css';
-	import { page } from '$app/stores';
 
-	let hosts = [];
+	let hosts: any = [];
 	let newHostname = '';
 	let newIpAddress = '';
-	let errorMessage = ''; // To store the validation error message
-	let invalidHostname = false; // Tracks if hostname input is invalid
-	let invalidIpAddress = false; // Tracks if IP address input is invalid
-	let editingHost: { hostname: string, ipAddress: string } | null = null; // Stores the host being edited
+	let errorMessage = '';
+	let invalidHostname = false;
+	let invalidIpAddress = false;
+	let editingHost: { hostname: string; ipAddress: string } | null = null;
 
-	// Fetch hosts from the backend API
-	async function getHosts() {
+	// Validate IP address
+	function isValidIP(ip: string) {
+		return /^(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)$/.test(ip);
+	}
+
+	// Fetch hosts from the backend
+	async function fetchHosts() {
 		try {
-			const res = await fetch('http://10.0.1.10:5073/host_assignment/');
+			const res = await fetch('/Hosts');
 			const data = await res.json();
-
-			if (data && data.assignments) {
-				hosts = data.assignments; // Correctly assign the 'assignments' property
-			} else {
-				console.error('Error: Invalid data structure');
-			}
+			hosts = data;
 		} catch (error) {
 			console.error('Error fetching hosts:', error);
 		}
 	}
 
-	// Validate IP Address
-	function isValidIP(ip: string): boolean {
-		const ipRegex =
-			/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-		return ipRegex.test(ip);
-	}
-
-	// Add new host
+	// Add a new host
 	async function addHost() {
-		// Reset validation states
+		errorMessage = '';
 		invalidHostname = false;
 		invalidIpAddress = false;
-		errorMessage = '';
 
 		if (!newHostname.trim()) {
 			invalidHostname = true;
@@ -59,149 +50,121 @@
 			return;
 		}
 
-		// Check for duplicate IP address
+		// Check if the IP address already exists in the list
 		if (hosts.some((host) => host.ipAddress === newIpAddress)) {
 			invalidIpAddress = true;
 			errorMessage = 'The IP address already exists in the list.';
 			return;
 		}
 
+		// Send POST request to add host
 		try {
-			const resGet = await fetch('http://10.0.1.10:5073/host_assignment/');
-			if (!resGet.ok) {
-				const resBody = await resGet.text();
-				console.error('Failed to fetch existing hosts. Response:', resGet.status, resBody);
-				errorMessage = `Failed to fetch hosts: ${resGet.status} - ${resBody}`;
-				return;
-			}
-
-			const existingData = await resGet.json();
-
-			if (!existingData.assignments) {
-				existingData.assignments = [];
-			}
-
-			const updatedHosts = {
-				assignments: [...existingData.assignments, { hostname: newHostname, ipAddress: newIpAddress }]
-			};
-
-			const resPost = await fetch('http://10.0.1.10:5073/host_assignment/', {
+			const res = await fetch('/Hosts', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(updatedHosts)
+				body: JSON.stringify({ hostname: newHostname, ipAddress: newIpAddress })
 			});
 
-			if (!resPost.ok) {
-				const resBody = await resPost.text();
-				console.error('Failed to add host. Response:', resPost.status, resBody);
-				errorMessage = `Failed to add host: ${resPost.status} - ${resBody}`;
-				return;
+			const data = await res.json();
+			if (res.ok) {
+				hosts = data;
+				newHostname = '';
+				newIpAddress = '';
+			} else {
+				errorMessage = data.error || 'Failed to add host.';
 			}
-
-			hosts = updatedHosts.assignments;
-			newHostname = '';
-			newIpAddress = '';
-
-			location.reload(); // Reload the page to reflect updates
 		} catch (error) {
 			console.error('Error adding host:', error);
 			errorMessage = 'Error adding host.';
 		}
 	}
 
-	// Delete host
+	// Delete a host
 	async function deleteHost(ipAddress: string) {
 		try {
-			// Filter out the host with the given IP address
-			const updatedHosts = hosts.filter((host) => host.ipAddress !== ipAddress);
-
-			// Send the updated host list to the server
-			const resPost = await fetch('http://10.0.1.10:5073/host_assignment/', {
-				method: 'POST',
+			const res = await fetch('/Hosts', {
+				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ assignments: updatedHosts })
+				body: JSON.stringify({ ipAddress })
 			});
 
-			if (!resPost.ok) {
-				const resBody = await resPost.text();
-				console.error('Failed to delete host. Response:', resPost.status, resBody);
-				errorMessage = `Failed to delete host: ${resPost.status} - ${resBody}`;
-				return;
+			const data = await res.json();
+			if (res.ok) {
+				hosts = data;
+			} else {
+				errorMessage = data.error || 'Failed to delete host.';
 			}
-
-			hosts = updatedHosts;
-
-			// Reload the page to reflect updates
-			location.reload();
 		} catch (error) {
 			console.error('Error deleting host:', error);
 			errorMessage = 'Error deleting host.';
 		}
 	}
 
-	// Start editing a host
-	function startEditing(host: { hostname: string, ipAddress: string }) {
-		editingHost = { ...host }; // Create a copy of the host data to edit
-	}
+	// Edit an existing host
+	async function editHost(ipAddress: string, updatedHostname: string, updatedIpAddress: string) {
+		errorMessage = '';
+		invalidHostname = false;
+		invalidIpAddress = false;
 
-	// Update host
-	async function updateHost() {
-		if (!editingHost || !editingHost.hostname.trim() || !editingHost.ipAddress.trim()) return;
+		if (!updatedHostname.trim()) {
+			invalidHostname = true;
+			errorMessage = 'Hostname is required.';
+			return;
+		}
 
-		// Validate IP Address
-		if (!isValidIP(editingHost.ipAddress)) {
+		if (!updatedIpAddress.trim()) {
+			invalidIpAddress = true;
+			errorMessage = 'IP Address is required.';
+			return;
+		}
+
+		if (!isValidIP(updatedIpAddress)) {
+			invalidIpAddress = true;
 			errorMessage = 'Please enter a valid IP address.';
 			return;
 		}
 
-		// Update the host
-		try {
-			const updatedHosts = hosts.map((host) =>
-				host.ipAddress === editingHost.ipAddress
-					? { hostname: editingHost.hostname, ipAddress: editingHost.ipAddress }
-					: host
-			);
+		// Check if the new IP address already exists
+		if (hosts.some((host) => host.ipAddress === updatedIpAddress && host.ipAddress !== ipAddress)) {
+			invalidIpAddress = true;
+			errorMessage = 'The IP address already exists in the list.';
+			return;
+		}
 
-			// Send updated JSON to the server
-			const resPost = await fetch('http://10.0.1.10:5073/host_assignment/', {
-				method: 'POST',
+		// Send PUT request to update host
+		try {
+			const res = await fetch('/Hosts', {
+				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ assignments: updatedHosts })
+				body: JSON.stringify({ oldIpAddress: ipAddress, hostname: updatedHostname, ipAddress: updatedIpAddress })
 			});
 
-			if (!resPost.ok) {
-				const resBody = await resPost.text();
-				console.error('Failed to update host. Response:', resPost.status, resBody);
-				errorMessage = `Failed to update host: ${resPost.status} - ${resBody}`;
-				return;
+			const data = await res.json();
+			if (res.ok) {
+				hosts = data;
+				editingHost = null;
+				newHostname = '';
+				newIpAddress = '';
+			} else {
+				errorMessage = data.error || 'Failed to edit host.';
 			}
-
-			// Successfully updated, update UI
-			hosts = updatedHosts;
-			editingHost = null;
 		} catch (error) {
-			console.error('Error updating host:', error);
-			errorMessage = 'Error updating host.';
+			console.error('Error editing host:', error);
+			errorMessage = 'Error editing host.';
 		}
 	}
 
-	// Fetch hosts when the component mounts
-	onMount(getHosts);
+	// Start editing a host
+	function startEditHost(host: any) {
+		editingHost = { hostname: host.hostname, ipAddress: host.ipAddress };
+		newHostname = host.hostname;
+		newIpAddress = host.ipAddress;
+	}
 
-	onMount(() => {
-		const unsubscribe = page.subscribe(($page) => {
-			if ($page.url.searchParams.get('reload') === 'true') {
-				window.history.replaceState({}, '', '/home');
-				window.location.reload();
-			}
-		});
-		unsubscribe();
-	});
+	onMount(fetchHosts);
 </script>
 
-<svelte:head>
-	<title>Hosts</title>
-</svelte:head>
+<title>Hosts</title>
 
 <section id="hosts-management">
 	<h1>Hosts</h1>
@@ -214,39 +177,49 @@
 			<tr>
 				<th>Name</th>
 				<th>IP Address</th>
+				<th>Actions</th>
 			</tr>
 			</thead>
 			<tbody>
 			{#each hosts as host}
 				<tr>
+					<td>{host.hostname}</td>
+					<td>{host.ipAddress}</td>
 					<td>
-						{#if editingHost && editingHost.ipAddress === host.ipAddress}
-							<input type="text" bind:value={editingHost.hostname}
-										 on:keydown={(e) => e.key === 'Enter' && updateHost()} />
-						{:else}
-							{host.hostname}
-						{/if}
-					</td>
-					<td>
-						{host.ipAddress}
-					</td>
-					<td>
-						{#if editingHost && editingHost.ipAddress === host.ipAddress}
-							<button class="save-btn" on:click={updateHost}>Save</button>
-						{:else}
-							<button class="edit-btn" title="Edit {host.hostname}" style="cursor: pointer" on:click={() => startEditing(host)}>
-								<i class="material-icons">edit</i>
-							</button>
-						{/if}
-					</td>
-					<td>
-						<button class="delete-btn" title="Delete {host.hostname}" style="cursor: pointer"
+						<button class="delete-btn" style="cursor: pointer" title="Delete Alert {host.hostname}"
 										on:click={() => deleteHost(host.ipAddress)}>
 							<i class="material-icons">delete</i>
+						</button>
+						<button class="edit-btn" style="cursor: pointer" title="Edit Host {host.hostname}"
+										on:click={() => startEditHost(host)}>
+							<i class="material-icons">edit</i>
 						</button>
 					</td>
 				</tr>
 			{/each}
+			{#if editingHost}
+				<tr>
+					<td>
+						<input
+							type="text"
+							bind:value={newHostname}
+							placeholder="Hostname"
+							class={invalidHostname ? 'input-error' : ''}
+							on:keydown={(e) => e.key === 'Enter' && editHost(editingHost.ipAddress, newHostname, newIpAddress)}
+							autofocus
+						/>
+					</td>
+					<td>
+						<input
+							type="text"
+							bind:value={newIpAddress}
+							placeholder="IP Address"
+							class={invalidIpAddress ? 'input-error' : ''}
+							on:keydown={(e) => e.key === 'Enter' && editHost(editingHost.ipAddress, newHostname, newIpAddress)}
+						/>
+					</td>
+				</tr>
+			{/if}
 			<tr>
 				<td>
 					<input
@@ -255,7 +228,6 @@
 						placeholder="Hostname"
 						class={invalidHostname ? 'input-error' : ''}
 						on:keydown={(e) => e.key === 'Enter' && addHost()}
-						autofocus
 					/>
 				</td>
 				<td>
