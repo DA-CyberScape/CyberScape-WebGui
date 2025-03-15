@@ -37,14 +37,6 @@ const structure: string =
 	'      "port": "integer"\n' +
 	'    }\n' +
 	'  ],\n' +
-	'  "PRTGReceiver": [\n' +
-	'    {\n' +
-	'      "name": "string",\n' +
-	'      "id": "integer",\n' +
-	'      "PRTGUrl": "string",\n' +
-	'      "apiToken": "string"\n' +
-	'    }\n' +
-	'  ],\n' +
 	'  "snmpTrapReceiver": [\n' +
 	'    {\n' +
 	'      "name": "string",\n' +

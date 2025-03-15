@@ -1,26 +1,46 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { invalidate } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import './styles.css';
+	import { goto } from '$app/navigation';
 
-	let alerts = $page.data.alerts;
+	let alerts: any = [];
 
+	async function fetchFromProxy(endpoint: string, method = 'GET', body?: any) {
+		const options: RequestInit = { method };
+		if (body) {
+			options.headers = { 'Content-Type': 'application/json' };
+			options.body = JSON.stringify(body);
+		}
+
+		const response = await fetch(`/api/proxy?endpoint=${encodeURIComponent(endpoint)}`, options);
+		if (!response.ok) {
+			throw new Error(`API error: ${response.statusText}`);
+		}
+		return response.json();
+	}
+
+	onMount(async () => {
+		try {
+			alerts = await fetchFromProxy('alerts/');
+		} catch (error) {
+			console.error('Error fetching alerts:', error);
+			alerts = [];
+		}
+	});
+
+	// Function to delete the alert
 	const deleteAlert = async (alertId: string, event: MouseEvent) => {
-		event.stopPropagation();
+		event.stopPropagation(); // Prevent row click when deleting
 
-		const formData = new FormData();
-		formData.append('alertId', alertId);
-
-		await fetch('/Alerts/delete', { // Ensure correct path
-			method: 'POST',
-			body: formData
-		});
-
-		await invalidate('alerts'); // Refresh alerts list
+		try {
+			await fetchFromProxy(`alerts/${alertId}`, 'DELETE');
+			alerts = alerts.filter((alert) => alert.id !== alertId);
+		} catch (error) {
+			console.error('Error deleting alert:', error);
+		}
 	};
 
-
+	// Function to navigate to the alert details page
 	const navigateToAlert = (alertId: string) => {
 		goto(`/Alerts/${alertId}`);
 	};

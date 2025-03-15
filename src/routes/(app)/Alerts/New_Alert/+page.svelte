@@ -5,89 +5,66 @@
 
 	let name = '', email = '', customMessage = '', selectedTable = '', selectedColumn = '', selectedOperator = '',
 		comparisonValue = '';
-	let tables = [], columns = [], nextId = 1, isLoading = true;
+	let tables: string[] = [], columns: string[] = [], nextId = 1, isLoading = true;
 	const operators = ['<', '>', '=', '<=', '>=', '!='];
 
-	// Map to store lowercase table names and their original names
-	let tableMap: { [key: string]: string } = {};
+	let tableMap: Record<string, string> = {};
+
+	async function fetchFromProxy(endpoint: string, method = 'GET', body?: any) {
+		const options: RequestInit = { method };
+		if (body) {
+			options.headers = { 'Content-Type': 'application/json' };
+			options.body = JSON.stringify(body);
+		}
+
+		const response = await fetch(`/api/proxy?endpoint=${encodeURIComponent(endpoint)}`, options);
+		if (!response.ok) {
+			throw new Error(`API error: ${response.statusText}`);
+		}
+		return response.json();
+	}
 
 	onMount(async () => {
 		try {
-			const [alertsResponse, tablesResponse] = await Promise.all([
-				fetch('http://10.0.1.10:5073/alerts/'),
-				fetch('http://10.0.1.10:5073/configurations/Database/schema')
+			const [alerts, schema] = await Promise.all([
+				fetchFromProxy('alerts/'),
+				fetchFromProxy('configurations/Database/schema')
 			]);
 
-			if (alertsResponse.ok) {
-				const alerts = await alertsResponse.json();
-				nextId = alerts.length ? Math.max(...alerts.map(a => a.id)) + 1 : 1;
-			}
+			nextId = alerts.length ? Math.max(...alerts.map(a => a.id)) + 1 : 1;
 
-			if (tablesResponse.ok) {
-				const schema = await tablesResponse.json();
-				const productionTables = schema.Production;
+			const productionTables = schema.Production;
+			tableMap = Object.keys(productionTables).reduce((acc, table) => {
+				if (!table.includes('"') && table.trim() !== '') {
+					acc[table.toLowerCase()] = table;
+				}
+				return acc;
+			}, {});
 
-				// Convert table names to lowercase before storing them
-				tables = Object.keys(productionTables)
-					.filter(table => !table.includes('\"') && table.trim() !== '')
-					.map(table => table.toLowerCase())  // Convert each table name to lowercase
-					.sort();
-
-				// Create a map of lowercase table names to the original names
-				tableMap = Object.keys(productionTables)
-					.filter(table => !table.includes('\"') && table.trim() !== '')
-					.reduce((map, table) => {
-						map[table.toLowerCase()] = table;
-						return map;
-					}, {} as { [key: string]: string });
-			}
+			tables = Object.keys(tableMap).sort();
 		} catch (error) {
-			alert('Failed to load tables or alerts. Please try again later.');
+			alert('Failed to load tables or proxy. Please try again later.');
 			console.error('Fetch error:', error);
 		} finally {
 			isLoading = false;
 		}
 	});
 
-	// This is to fetch columns for the selected table
 	async function fetchColumns() {
-		if (!selectedTable) return;  // Prevent fetching if no table is selected
+		if (!selectedTable) return;
 
-		// Get the original table name from the map using the lowercase selectedTable
 		const selectedTableOriginal = tableMap[selectedTable];
 
 		try {
-			const response = await fetch('http://10.0.1.10:5073/configurations/Database/schema');
-			if (response.ok) {
-				const schema = await response.json();
-				const database = schema.Production;
+			const schema = await fetchFromProxy('configurations/Database/schema');
+			const database = schema.Production;
 
-				// Check if the selected table exists in the schema
-				if (database[selectedTableOriginal]) {
-					// Get the columns of the selected table using the original table name
-					const selectedTableColumns = database[selectedTableOriginal];
-
-					// Ensure the selected table exists in the schema
-					if (selectedTableColumns && selectedTableColumns.length > 0) {
-						// Flatten and process all column sets if the table contains multiple rows of columns
-						columns = selectedTableColumns.flatMap(colSet =>
-							colSet.split(',') // Split by comma to separate each column
-								.map(col => {
-									col = col.trim();
-									// Extract column name by splitting on the first space and cleaning
-									const columnName = col.split(' ')[0].trim();
-									return columnName.replace(/["`]/g, '').toLowerCase(); // Convert column names to lowercase
-								})
-								.filter(col => col !== '') // Remove empty values
-						);
-					} else {
-						columns = [];
-					}
-				} else {
-					console.error(`Table ${selectedTableOriginal} not found in schema!`);
-				}
+			if (database[selectedTableOriginal]) {
+				columns = database[selectedTableOriginal].flatMap(colSet =>
+					colSet.split(',').map(col => col.trim().split(' ')[0].replace(/["`]/g, '').toLowerCase())
+				).filter(col => col !== '');
 			} else {
-				console.error('Failed to fetch schema for columns');
+				console.error(`Table ${selectedTableOriginal} not found in schema!`);
 			}
 		} catch (error) {
 			alert('Failed to load columns. Please try again.');
@@ -112,26 +89,15 @@
 		};
 
 		try {
-			const response = await fetch('http://10.0.1.10:5073/alerts/', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(newAlert)
-			});
-
-			if (response.ok) {
-				alert('Alert created successfully!');
-			} else {
-				const errorText = await response.text();
-				alert(`Failed to create alert: ${errorText}`);
-			}
+			// Sending both endpoint and body in the request payload
+			await fetchFromProxy('alerts/', 'POST', { endpoint: 'alerts/', body: newAlert });
+			alert('Alert created successfully!');
+			await goto('/Alerts');
 		} catch (error) {
 			alert('Error creating alert. Please try again.');
 			console.error('Create alert error:', error);
 		}
-
-		await goto('/Alerts');
 	}
-
 </script>
 
 <title>Create new Alert</title>
@@ -141,7 +107,7 @@
 	<div class="form-group">
 
 		{#if isLoading}
-			<div class="loading-message" aria-live="polite">Loading tables, please wait...</div>
+			<div class="loading-message" aria-live="polite" style="color: white">Loading tables, please wait...</div>
 		{:else}
 			<form on:submit|preventDefault={createAlert} aria-label="Create alert form">
 

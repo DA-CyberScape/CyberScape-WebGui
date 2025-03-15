@@ -11,7 +11,7 @@
 
 	onMount(async () => {
 		try {
-			const sourcesResponse = await fetch('http://10.0.1.10:5073/configurations/');
+			const sourcesResponse = await fetch('/api/proxy?endpoint=configurations/');
 			const structureResponse = await fetch('/api/dsstructure');
 
 			if (!sourcesResponse.ok) {
@@ -48,8 +48,6 @@
 		if (!selectedSourceId) return;
 
 		try {
-			console.log('Selected ID to delete:', selectedSourceId);
-			console.log('Before deletion:', JSON.stringify(dataSources, null, 2));
 
 			const updatedDataSources = dataSources.map((source) => {
 				const key = Object.keys(source)[0];
@@ -58,10 +56,9 @@
 				};
 			});
 
-			console.log('Posting updated sources:', JSON.stringify(updatedDataSources, null, 2));
 
 			// Send the full updated list
-			const response = await fetch('http://10.0.1.10:5073/configurations/', {
+			const response = await fetch('/api/proxy?endpoint=configurations/', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(updatedDataSources)
@@ -73,8 +70,6 @@
 
 			// Force reactivity
 			dataSources = [...updatedDataSources];
-
-			console.log('Updated sources after deletion:', JSON.stringify(dataSources, null, 2));
 
 			closePopup();
 		} catch (error) {

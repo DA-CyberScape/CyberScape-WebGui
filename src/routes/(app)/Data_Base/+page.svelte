@@ -29,7 +29,7 @@
 
 	onMount(async () => {
 		try {
-			const response = await fetch('http://10.0.1.10:5073/configurations/database/');
+			const response = await fetch('/api/proxy?endpoint=configurations/database/');
 			if (!response.ok) {
 				throw new Error(`Failed to fetch data: ${response.statusText}`);
 			}
@@ -77,9 +77,8 @@
 		// Convert updated `dbSettings` back to YAML with proper formatting
 		const yamlData = yaml.dump(dbSettings, { indent: 2 });
 
-
 		try {
-			const response = await fetch('http://10.0.1.10:5073/configurations/database/', {
+			const response = await fetch('/api/proxy?endpoint=configurations/database/', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/x-yaml' },
 				body: yamlData
@@ -129,8 +128,7 @@
 					}))
 				};
 
-				// Persist the change
-				const response = await fetch('http://10.0.1.10:5073/configurations/database/', {
+				const response = await fetch('/api/proxy?endpoint=configurations/database/', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(dbSettings)
@@ -180,7 +178,7 @@
 		const yamlData = yaml.dump(dbSettings, { indent: 2 });
 
 		try {
-			const response = await fetch('http://10.0.1.10:5073/configurations/database/', {
+			const response = await fetch('/api/proxy?endpoint=configurations/database/', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/x-yaml' },
 				body: yamlData
@@ -231,7 +229,6 @@
 
 <section id="db-settings-section">
 	<h1 id="db-settings-title">DB Settings</h1>
-
 
 	{#if error}
 		<p id="db-settings-error" style="color: red;">Error: {error}</p>
@@ -315,8 +312,11 @@
 				<h2>Confirm Active Change</h2>
 				<p>Are you sure you want to change the active database?</p>
 
-				<button class="submit" style="background-color: green; color: white; cursor: pointer" on:click={confirmActiveChange}>Yes</button>
-				<button class="submit" style="background-color: red; color: white; cursor: pointer" on:click={closePopup}>No</button>
+				<button class="submit" style="background-color: green; color: white; cursor: pointer"
+								on:click={confirmActiveChange}>Yes
+				</button>
+				<button class="submit" style="background-color: red; color: white; cursor: pointer" on:click={closePopup}>No
+				</button>
 			</div>
 		</div>
 	{/if}
@@ -326,10 +326,14 @@
 			<div class="popup-box">
 				<button class="close" on:click={closedeletionPopup}>&times;</button>
 				<h2>Confirm Cluster Deletion</h2>
-				<p>Are you sure you want to delete this cluster?</p>
+				<p>Are you sure you want to delete the cluster {clusterToDelete}?</p>
 
-				<button class="submit" style="background-color: green; color: white; cursor: pointer" on:click={deleteCluster}>Yes</button>
-				<button class="submit" style="background-color: red; color: white; cursor: pointer" on:click={closedeletionPopup}>No</button>
+				<button class="submit" style="background-color: green; color: white; cursor: pointer" on:click={deleteCluster}>
+					Yes
+				</button>
+				<button class="submit" style="background-color: red; color: white; cursor: pointer"
+								on:click={closedeletionPopup}>No
+				</button>
 			</div>
 		</div>
 	{/if}

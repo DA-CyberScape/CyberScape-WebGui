@@ -23,7 +23,7 @@
 	async function fetchData() {
 		isLoading = true;
 		try {
-			const response = await fetch('http://10.0.1.10:5073/configurations/database/');
+			const response = await fetch('/api/proxy?endpoint=configurations/database/');
 			if (!response.ok) {
 				throw new Error(`Failed to fetch data: ${response.statusText}`);
 			}
@@ -141,7 +141,7 @@
 		const yamlData = yaml.dump(dbSettings, { indent: 2 });
 
 		try {
-			const response = await fetch('http://10.0.1.10:5073/configurations/database/', {
+			const response = await fetch('/api/proxy?endpoint=configurations/database/', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/x-yaml' },
 				body: yamlData

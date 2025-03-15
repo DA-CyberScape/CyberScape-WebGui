@@ -35,7 +35,7 @@
 
 	async function filterAvailableTypes() {
 		try {
-			const response = await fetch('http://10.0.1.10:5073/configurations/');
+			const response = await fetch('/api/proxy?endpoint=configurations/');
 			if (!response.ok) {
 				throw new Error(`Failed to fetch existing sources: ${response.statusText}`);
 			}
@@ -95,7 +95,7 @@
 		let highestId = 0;
 
 		try {
-			const response = await fetch('http://10.0.1.10:5073/configurations/');
+			const response = await fetch('/api/proxy?endpoint=configurations/');
 			if (!response.ok) {
 				throw new Error(`Error fetching data sources: ${response.statusText}`);
 			}
@@ -130,7 +130,7 @@
 		}
 
 		try {
-			const response = await fetch('http://10.0.1.10:5073/configurations/');
+			const response = await fetch('/api/proxy?endpoint=configurations/');
 			if (!response.ok) {
 				throw new Error(`Error fetching data sources: ${response.statusText}`);
 			}
@@ -147,7 +147,7 @@
 				return;
 			}
 
-			const saveResponse = await fetch('http://10.0.1.10:5073/configurations/', {
+			const saveResponse = await fetch('/api/proxy?endpoint=configurations/', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(existingDataSources)

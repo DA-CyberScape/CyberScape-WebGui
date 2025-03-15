@@ -15,7 +15,7 @@
 
 	onMount(async () => {
 		try {
-			const sourcesResponse = await fetch('http://10.0.1.10:5073/configurations/');
+			const sourcesResponse = await fetch('/api/proxy?endpoint=configurations/');
 			const structureResponse = await fetch('/api/dsstructure');
 
 			if (!sourcesResponse.ok || !structureResponse.ok) {
@@ -160,7 +160,7 @@
 		}
 
 
-		fetch('http://10.0.1.10:5073/configurations/', {
+		fetch('/api/proxy?endpoint=configurations/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

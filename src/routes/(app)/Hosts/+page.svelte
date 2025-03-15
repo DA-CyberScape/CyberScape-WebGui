@@ -2,35 +2,41 @@
 	import { onMount } from 'svelte';
 	import './styles.css';
 
-	let hosts: any = [];
+	let hosts: { hostname: string; ipAddress: string; device_type: string }[] = [];
 	let newHostname = '';
 	let newIpAddress = '';
+	let newDevice_type = 'PC';
 	let errorMessage = '';
 	let invalidHostname = false;
 	let invalidIpAddress = false;
-	let editingHost: { hostname: string; ipAddress: string } | null = null;
+	let editingHost: { hostname: string, ipAddress: string, device_type: string } | null = null;
 
-	// Validate IP address
-	function isValidIP(ip: string) {
-		return /^(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)$/.test(ip);
-	}
-
-	// Fetch hosts from the backend
-	async function fetchHosts() {
+	// Fetch hosts from API
+	async function getHosts() {
 		try {
-			const res = await fetch('/Hosts');
+			const res = await fetch('/api/proxy?endpoint=host_assignment');
+			if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+
 			const data = await res.json();
-			hosts = data;
+			hosts = data?.assignments || [];
 		} catch (error) {
 			console.error('Error fetching hosts:', error);
+			errorMessage = 'Failed to load host data.';
 		}
 	}
 
-	// Add a new host
+	// Validate IP Address
+	function isValidIP(ip: string): boolean {
+		const ipRegex =
+			/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+		return ipRegex.test(ip);
+	}
+
+	// Add new host
 	async function addHost() {
-		errorMessage = '';
 		invalidHostname = false;
 		invalidIpAddress = false;
+		errorMessage = '';
 
 		if (!newHostname.trim()) {
 			invalidHostname = true;
@@ -38,133 +44,127 @@
 			return;
 		}
 
-		if (!newIpAddress.trim()) {
-			invalidIpAddress = true;
-			errorMessage = 'IP Address is required.';
-			return;
-		}
-
-		if (!isValidIP(newIpAddress)) {
+		if (!newIpAddress.trim() || !isValidIP(newIpAddress)) {
 			invalidIpAddress = true;
 			errorMessage = 'Please enter a valid IP address.';
 			return;
 		}
 
-		// Check if the IP address already exists in the list
 		if (hosts.some((host) => host.ipAddress === newIpAddress)) {
 			invalidIpAddress = true;
 			errorMessage = 'The IP address already exists in the list.';
 			return;
 		}
 
-		// Send POST request to add host
 		try {
-			const res = await fetch('/Hosts', {
+			// Construct the new host object
+			const newHost = {
+				hostname: newHostname,
+				ipAddress: newIpAddress,
+				device_type: newDevice_type || 'PC'
+			};
+
+			// Send the new host object in the correct format
+			const resPost = await fetch('/api/proxy', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ hostname: newHostname, ipAddress: newIpAddress })
+				body: JSON.stringify({
+					endpoint: 'host_assignment',
+					body: {
+						assignments: [...hosts, newHost]
+					}
+				})
 			});
 
-			const data = await res.json();
-			if (res.ok) {
-				hosts = data;
-				newHostname = '';
-				newIpAddress = '';
-			} else {
-				errorMessage = data.error || 'Failed to add host.';
+			if (!resPost.ok) {
+				const resBody = await resPost.text();
+				errorMessage = `Failed to add host: ${resPost.status} - ${resBody}`;
+				console.error(errorMessage);
+				return;
 			}
+
+			// Update the local state
+			hosts = [...hosts, newHost];
+			resetForm();
+
 		} catch (error) {
 			console.error('Error adding host:', error);
 			errorMessage = 'Error adding host.';
 		}
 	}
 
+
 	// Delete a host
 	async function deleteHost(ipAddress: string) {
 		try {
-			const res = await fetch('/Hosts', {
-				method: 'DELETE',
+			const updatedHosts = hosts.filter(host => host.ipAddress !== ipAddress);
+
+			const res = await fetch('/api/proxy', {
+				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ ipAddress })
+				body: JSON.stringify({ endpoint: 'host_assignment', body: { assignments: updatedHosts } })
 			});
 
-			const data = await res.json();
-			if (res.ok) {
-				hosts = data;
-			} else {
-				errorMessage = data.error || 'Failed to delete host.';
+			if (!res.ok) {
+				errorMessage = `Failed to delete host: ${res.status}`;
+				return;
 			}
+
+			hosts = updatedHosts;
 		} catch (error) {
-			console.error('Error deleting host:', error);
 			errorMessage = 'Error deleting host.';
 		}
 	}
 
-	// Edit an existing host
-	async function editHost(ipAddress: string, updatedHostname: string, updatedIpAddress: string) {
-		errorMessage = '';
-		invalidHostname = false;
-		invalidIpAddress = false;
+	// Start editing a host
+	function startEditing(host: { hostname: string; ipAddress: string; device_type: string }) {
+		editingHost = { ...host };
+	}
 
-		if (!updatedHostname.trim()) {
-			invalidHostname = true;
-			errorMessage = 'Hostname is required.';
+	// Update host
+	async function updateHost() {
+		if (!editingHost || !isValidIP(editingHost.ipAddress)) {
+			errorMessage = 'Invalid IP address.';
 			return;
 		}
 
-		if (!updatedIpAddress.trim()) {
-			invalidIpAddress = true;
-			errorMessage = 'IP Address is required.';
-			return;
-		}
-
-		if (!isValidIP(updatedIpAddress)) {
-			invalidIpAddress = true;
-			errorMessage = 'Please enter a valid IP address.';
-			return;
-		}
-
-		// Check if the new IP address already exists
-		if (hosts.some((host) => host.ipAddress === updatedIpAddress && host.ipAddress !== ipAddress)) {
-			invalidIpAddress = true;
-			errorMessage = 'The IP address already exists in the list.';
-			return;
-		}
-
-		// Send PUT request to update host
 		try {
-			const res = await fetch('/Hosts', {
-				method: 'PUT',
+			const updatedHosts = hosts.map(host =>
+				host.ipAddress === editingHost!.ipAddress ? editingHost! : host
+			);
+
+			const res = await fetch('/api/proxy', {
+				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ oldIpAddress: ipAddress, hostname: updatedHostname, ipAddress: updatedIpAddress })
+				body: JSON.stringify({ endpoint: 'host_assignment', body: { assignments: updatedHosts } })
 			});
 
-			const data = await res.json();
-			if (res.ok) {
-				hosts = data;
-				editingHost = null;
-				newHostname = '';
-				newIpAddress = '';
-			} else {
-				errorMessage = data.error || 'Failed to edit host.';
+			if (!res.ok) {
+				errorMessage = `Failed to update host: ${res.status}`;
+				return;
 			}
+
+			hosts = updatedHosts;
+			editingHost = null;
 		} catch (error) {
-			console.error('Error editing host:', error);
-			errorMessage = 'Error editing host.';
+			errorMessage = 'Error updating host.';
 		}
 	}
 
-	// Start editing a host
-	function startEditHost(host: any) {
-		editingHost = { hostname: host.hostname, ipAddress: host.ipAddress };
-		newHostname = host.hostname;
-		newIpAddress = host.ipAddress;
+	// Reset form fields
+	function resetForm() {
+		newHostname = '';
+		newIpAddress = '';
+		newDevice_type = 'PC';
 	}
 
-	onMount(fetchHosts);
+	onMount(getHosts);
 </script>
 
-<title>Hosts</title>
+
+<svelte:head>
+	<title>Hosts</title>
+</svelte:head>
 
 <section id="hosts-management">
 	<h1>Hosts</h1>
@@ -177,49 +177,54 @@
 			<tr>
 				<th>Name</th>
 				<th>IP Address</th>
-				<th>Actions</th>
+				<th>Device Type</th>
 			</tr>
 			</thead>
 			<tbody>
 			{#each hosts as host}
 				<tr>
-					<td>{host.hostname}</td>
-					<td>{host.ipAddress}</td>
 					<td>
-						<button class="delete-btn" style="cursor: pointer" title="Delete Alert {host.hostname}"
+						{#if editingHost && editingHost.ipAddress === host.ipAddress}
+							<input type="text" bind:value={editingHost.hostname}
+										 on:keydown={(e) => e.key === 'Enter' && updateHost()} />
+						{:else}
+							{host.hostname}
+						{/if}
+					</td>
+					<td>
+						{host.ipAddress}
+					</td>
+					<td>
+						{#if editingHost && editingHost.ipAddress === host.ipAddress}
+							<select bind:value={editingHost.device_type} on:change={updateHost}>
+								<option value="PC">PC</option>
+								<option value="Switch">Switch</option>
+								<option value="Router">Router</option>
+								<option value="Firewall">Firewall</option>
+								<option value="Server">Server</option>
+							</select>
+						{:else}
+							{host.device_type}
+						{/if}
+					</td>
+					<td>
+						{#if editingHost && editingHost.ipAddress === host.ipAddress}
+							<button class="save-btn" on:click={updateHost}>Save</button>
+						{:else}
+							<button class="edit-btn" title="Edit {host.hostname}" style="cursor: pointer"
+											on:click={() => startEditing(host)}>
+								<i class="material-icons">edit</i>
+							</button>
+						{/if}
+					</td>
+					<td>
+						<button class="delete-btn" title="Delete {host.hostname}" style="cursor: pointer"
 										on:click={() => deleteHost(host.ipAddress)}>
 							<i class="material-icons">delete</i>
-						</button>
-						<button class="edit-btn" style="cursor: pointer" title="Edit Host {host.hostname}"
-										on:click={() => startEditHost(host)}>
-							<i class="material-icons">edit</i>
 						</button>
 					</td>
 				</tr>
 			{/each}
-			{#if editingHost}
-				<tr>
-					<td>
-						<input
-							type="text"
-							bind:value={newHostname}
-							placeholder="Hostname"
-							class={invalidHostname ? 'input-error' : ''}
-							on:keydown={(e) => e.key === 'Enter' && editHost(editingHost.ipAddress, newHostname, newIpAddress)}
-							autofocus
-						/>
-					</td>
-					<td>
-						<input
-							type="text"
-							bind:value={newIpAddress}
-							placeholder="IP Address"
-							class={invalidIpAddress ? 'input-error' : ''}
-							on:keydown={(e) => e.key === 'Enter' && editHost(editingHost.ipAddress, newHostname, newIpAddress)}
-						/>
-					</td>
-				</tr>
-			{/if}
 			<tr>
 				<td>
 					<input
@@ -238,6 +243,15 @@
 						class={invalidIpAddress ? 'input-error' : ''}
 						on:keydown={(e) => e.key === 'Enter' && addHost()}
 					/>
+				</td>
+				<td>
+					<select bind:value={newDevice_type}>
+						<option value="PC">PC</option>
+						<option value="Switch">Switch</option>
+						<option value="Router">Router</option>
+						<option value="Firewall">Firewall</option>
+						<option value="Server">Server</option>
+					</select>
 				</td>
 			</tr>
 			</tbody>
