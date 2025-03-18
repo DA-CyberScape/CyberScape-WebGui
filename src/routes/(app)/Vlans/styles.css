@@ -1,0 +1,68 @@
+@import "../../colors.css";
+
+#vlans-management h1 {
+    color: var(--text);
+    margin-left: 30px;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+#vlans-management table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#vlans-management th {
+    background-color: var(--accent);
+    border: 1px solid #a3a3a3;
+    color: var(--text);
+    padding: 10px 20px;
+    text-align: left;
+}
+
+#vlans-management td {
+    padding: 10px 20px;
+    border: 1px solid #a3a3a3;
+    position: relative;
+}
+
+#vlans-management tbody tr {
+    background: #fff;
+}
+
+#vlans-management tbody tr:hover {
+    background-color: #e2e2e2;
+}
+
+#vlans-management td:empty {
+    color: #ccc;
+}
+
+#vlans-management td input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #a3a3a3;
+    background: transparent;
+    padding: 5px 0;
+    font-family: inherit;
+    font-size: inherit;
+    color: black;
+    outline: none;
+}
+
+#vlans-management td input:focus {
+    border-bottom: 2px solid var(--accent);
+}
+
+#vlans-management .input-error {
+    border-bottom: 2px solid red !important;
+}
+
+#vlans-management .error {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 4px;
+}

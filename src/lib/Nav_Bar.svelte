@@ -43,6 +43,7 @@
 		<a data-sveltekit-preload-data="off" href="/Data_Base" class="nav-link">Data Base<i
 			class="material-icons">settings</i></a>
 		<a data-sveltekit-preload-data="off" href="/Hosts" class="nav-link">Hosts<i class="material-icons">computer</i></a>
+		<a data-sveltekit-preload-data="off" href="/Vlans" class="nav-link">Vlans<i class="material-icons">cloud</i></a>
 		<a data-sveltekit-preload-data="off" href="/Alerts" class="nav-link">Alerts<i class="material-icons">notifications_active</i></a>
 		<a data-sveltekit-preload-data="off" href="/Account" class="nav-link">Account<i class="material-icons">account_circle</i></a>
 	</nav>
