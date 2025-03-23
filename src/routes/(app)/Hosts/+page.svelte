@@ -64,17 +64,14 @@
 				device_type: newDevice_type || 'PC'
 			};
 
-			// Send the new host object in the correct format
-			const resPost = await fetch('/api/proxy', {
+			const resPost = await fetch('/api/proxy?endpoint=host_assignment', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					endpoint: 'host_assignment',
-					body: {
-						assignments: [...hosts, newHost]
-					}
+					assignments: [...hosts, newHost]
 				})
 			});
+
 
 			if (!resPost.ok) {
 				const resBody = await resPost.text();
@@ -99,22 +96,28 @@
 		try {
 			const updatedHosts = hosts.filter(host => host.ipAddress !== ipAddress);
 
-			const res = await fetch('/api/proxy', {
+			const res = await fetch('/api/proxy?endpoint=host_assignment', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ endpoint: 'host_assignment', body: { assignments: updatedHosts } })
+				body: JSON.stringify({
+					assignments: updatedHosts
+				})
 			});
 
 			if (!res.ok) {
-				errorMessage = `Failed to delete host: ${res.status}`;
+				const resBody = await res.text();
+				errorMessage = `Failed to delete host: ${res.status} - ${resBody}`;
+				console.error(errorMessage);
 				return;
 			}
 
 			hosts = updatedHosts;
 		} catch (error) {
+			console.error('Error deleting host:', error);
 			errorMessage = 'Error deleting host.';
 		}
 	}
+
 
 	// Start editing a host
 	function startEditing(host: { hostname: string; ipAddress: string; device_type: string }) {
