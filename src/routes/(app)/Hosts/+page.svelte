@@ -136,23 +136,29 @@
 				host.ipAddress === editingHost!.ipAddress ? editingHost! : host
 			);
 
-			const res = await fetch('/api/proxy', {
+			const res = await fetch('/api/proxy?endpoint=host_assignment', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ endpoint: 'host_assignment', body: { assignments: updatedHosts } })
+				body: JSON.stringify({
+					assignments: updatedHosts
+				})
 			});
 
 			if (!res.ok) {
-				errorMessage = `Failed to update host: ${res.status}`;
+				const resBody = await res.text();
+				errorMessage = `Failed to update host: ${res.status} - ${resBody}`;
+				console.error(errorMessage);
 				return;
 			}
 
 			hosts = updatedHosts;
 			editingHost = null;
 		} catch (error) {
+			console.error('Error updating host:', error);
 			errorMessage = 'Error updating host.';
 		}
 	}
+
 
 	// Reset form fields
 	function resetForm() {

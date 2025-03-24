@@ -26,11 +26,6 @@ async function parseResponse(response) {
 	}
 }
 
-// Helper function to determine if a string is likely YAML
-function isLikelyYAML(str) {
-	return str.trim().startsWith('---') || str.includes('\n') || !str.trim().startsWith('{');
-}
-
 export async function GET({ url }) {
 	const endpoint = url.searchParams.get('endpoint');
 	console.log(`[PROXY] GET request received for endpoint: ${endpoint}`);
@@ -41,15 +36,19 @@ export async function GET({ url }) {
 	}
 
 	try {
-		const response = await fetch(`${API_BASE_URL}/${endpoint}`);
 		console.log(`[PROXY] 🔄 Fetching: ${API_BASE_URL}/${endpoint}`);
+		const response = await fetch(`${API_BASE_URL}/${endpoint}`);
+
+		// Log response details
+		console.log('[PROXY] Response Status:', response.status);
+		console.log('[PROXY] Response Headers:', response.headers);
 
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 
 		const data = await parseResponse(response);
-		console.log('[PROXY] ✅ Success: Parsed response data');
+		console.log('[PROXY] ✅ Success: Parsed response data', data);
 		return json(data);
 	} catch (error) {
 		console.error('[PROXY] ❌ Fetch error:', error.message);
@@ -71,14 +70,18 @@ export async function POST({ url, request }) {
 	let requestBody;
 	let contentType = 'application/json';
 
+	console.log('[PROXY] Incoming Content-Type:', incomingContentType);
+
 	try {
 		if (incomingContentType.includes('application/x-yaml')) {
 			// Read the request body as raw text (YAML format)
 			requestBody = await request.text();
 			contentType = 'application/x-yaml';
+			console.log('[PROXY] Request Body (YAML):', requestBody);
 		} else {
 			// Read as JSON and store the object
 			requestBody = await request.json();
+			console.log('[PROXY] Request Body (JSON):', requestBody);
 		}
 	} catch (e) {
 		console.error('[PROXY] ❌ ERROR: Failed to parse request body', e);
@@ -90,7 +93,7 @@ export async function POST({ url, request }) {
 		const finalBody =
 			contentType === 'application/x-yaml' ? requestBody : JSON.stringify(requestBody);
 
-		console.log('[PROXY] 🔄 Sending request:', finalBody); // Debug log to verify correct format
+		console.log('[PROXY] 🔄 Sending request body:', finalBody); // Debug log to verify correct format
 
 		const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
 			method: 'POST',
@@ -98,12 +101,18 @@ export async function POST({ url, request }) {
 			body: finalBody
 		});
 
+		// Log the response status and headers
+		console.log('[PROXY] Response Status:', response.status);
+		console.log('[PROXY] Response Headers:', response.headers);
+
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
+			const responseBody = await response.text(); // Log the full response body
+			console.error('[PROXY] ❌ Response Body:', responseBody);
+			throw new Error(`HTTP error! status: ${response.status}, response: ${responseBody}`);
 		}
 
 		const responseData = await parseResponse(response);
-		console.log('[PROXY] ✅ Success: Received and parsed response');
+		console.log('[PROXY] ✅ Success: Received and parsed response', responseData);
 		return json(responseData, { status: response.status });
 	} catch (error) {
 		console.error(`[PROXY] ❌ POST error to ${endpoint}:`, error);
@@ -121,15 +130,19 @@ export async function DELETE({ url }) {
 	}
 
 	try {
+		console.log(`[PROXY] 🔄 Sending DELETE request to: ${API_BASE_URL}/${endpoint}`);
 		const response = await fetch(`${API_BASE_URL}/${endpoint}`, { method: 'DELETE' });
-		console.log(`[PROXY] 🔄 Deleting: ${API_BASE_URL}/${endpoint}`);
+
+		// Log response status and headers
+		console.log('[PROXY] Response Status:', response.status);
+		console.log('[PROXY] Response Headers:', response.headers);
 
 		if (!response.ok) {
 			throw new Error(`Failed to delete ${endpoint} - Status: ${response.status}`);
 		}
 
 		const responseData = await parseResponse(response);
-		console.log(`[PROXY] ✅ Success: Deleted ${endpoint}`);
+		console.log(`[PROXY] ✅ Success: Deleted ${endpoint}`, responseData);
 		return json(responseData);
 	} catch (error) {
 		console.error('[PROXY] ❌ DELETE error:', error);

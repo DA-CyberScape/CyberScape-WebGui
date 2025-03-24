@@ -89,8 +89,12 @@
 		};
 
 		try {
-			// Sending both endpoint and body in the request payload
-			await fetchFromProxy('alerts/', 'POST', { endpoint: 'alerts/', body: newAlert });
+			await fetch('/api/proxy?endpoint=alerts/', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(newAlert) // Kein extra 'endpoint' in der Body
+			});
+
 			alert('Alert created successfully!');
 			await goto('/Alerts');
 		} catch (error) {

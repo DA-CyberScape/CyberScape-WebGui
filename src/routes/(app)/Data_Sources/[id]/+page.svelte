@@ -2,6 +2,7 @@
 	import './styles.css';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	let dataSources: any = null;
 	let selectedDataSource: any = null;
@@ -59,6 +60,7 @@
 		}
 	}
 
+	// Function to determine the input type for a given field
 	function getInputType(key: string) {
 		function findFieldType(obj: any): string | null {
 			if (obj && typeof obj === 'object') {
@@ -89,7 +91,7 @@
 		return findFieldType(dataStructure) || 'text';
 	}
 
-
+	// Function to get options for select fields
 	function getOptions(key: string): string[] {
 		function findEnumOptions(obj: any): string[] | null {
 			if (obj && typeof obj === 'object') {
@@ -114,6 +116,7 @@
 		return findEnumOptions(dataStructure) || [];
 	}
 
+	// Function to handle checkbox changes
 	function handleCheckboxChange(index: number, isChecked: boolean) {
 		if (isChecked) {
 			if (!oids[index].oid.endsWith('.x')) {
@@ -126,24 +129,66 @@
 		}
 	}
 
+	// Function to convert input values to the correct type (number, string, etc.)
+	function convertValueToCorrectType(key: string, value: any): any {
+		const fieldType = getFieldTypeFromStructure(key);
+		if (fieldType === 'number' && value !== '') {
+			return Number(value);
+		}
+		return value;
+	}
 
+	// Function to get field type from data structure
+	function getFieldTypeFromStructure(key: string): string {
+		function findFieldType(obj: any): string | null {
+			if (obj && typeof obj === 'object') {
+				if (Array.isArray(obj)) {
+					for (const item of obj) {
+						const result = findFieldType(item);
+						if (result) return result;
+					}
+				} else {
+					for (const [k, v] of Object.entries(obj)) {
+						if (k === key) {
+							if (v && typeof v === 'object' && 'enum' in v) {
+								return 'select';
+							} else if (v === 'integer') {
+								return 'number';
+							} else {
+								return 'text';
+							}
+						}
+						const result = findFieldType(v);
+						if (result) return result;
+					}
+				}
+			}
+			return null;
+		}
+
+		return findFieldType(dataStructure) || 'text';
+	}
+
+	// Function to update the data source with new values
 	function updateDataSource() {
 		const filteredOids = oids.filter(oid => oid.oid && oid.name);
 
 		let updatedDataSource: any = {
 			...selectedDataSource,
-			oids: selectedDataSource && Array.isArray(selectedDataSource.oids) ? filteredOids : undefined
+			oids: filteredOids
 		};
 
+		// Update other fields with values from input elements
 		for (const key of Object.keys(selectedDataSource)) {
 			if (key !== 'oids' && key !== 'id') {
 				const inputElement = document.getElementById(key) as HTMLInputElement;
 				if (inputElement) {
-					updatedDataSource[key] = inputElement.value;
+					updatedDataSource[key] = convertValueToCorrectType(key, inputElement.value);
 				}
 			}
 		}
 
+		// Find and update the selected data source in dataSources
 		if (dataSources) {
 			for (const sourceItem of dataSources) {
 				for (const sourceKey in sourceItem) {
@@ -159,7 +204,7 @@
 			}
 		}
 
-
+		// Send the updated data sources to the server
 		fetch('/api/proxy?endpoint=configurations/', {
 			method: 'POST',
 			headers: {
@@ -172,12 +217,14 @@
 					throw new Error(`Error updating data source: ${response.statusText}`);
 				}
 				window.alert('Data source updated successfully');
+				goto('/Data_Sources');
 			})
 			.catch(error => {
 				console.error('Error updating data:', error);
 			});
 	}
 
+	// Reactive cleanup of empty OIDs
 	$: {
 		for (let i = oids.length - 2; i >= 0; i--) {
 			if (oids[i].oid === '' && oids[i].name === '') {
@@ -186,6 +233,7 @@
 		}
 	}
 </script>
+
 
 <title>Data Source: {id}</title>
 <section>

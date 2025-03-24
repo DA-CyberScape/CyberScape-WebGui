@@ -158,7 +158,7 @@
 			}
 
 			window.alert('Data source saved successfully');
-			goto('/Data_Sources');
+			await goto('/Data_Sources');
 		} catch (error) {
 			console.error('Error saving data:', error);
 		}
